@@ -1,10 +1,32 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>Projet Node.js</title>
-</head>
-<body>
-  <h1>Front-end en construction</h1>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Projet Node.js</title>
+  </head>
+  <body>
+    <h1>Front-end en construction</h1>
+
+    <!-- Test d'infrastructure : le front (GitHub Pages) appelle l'API (Azure) -->
+    <p>API : <strong id="api">vérification…</strong></p>
+    <p>Base de données : <strong id="db">–</strong></p>
+
+    <script>
+      //  Domaine par défaut  de l'App Service
+      const API_URL =
+        "https://delivery-api-gwb3cxa5brapbec9.spaincentral-01.azurewebsites.net";
+
+      fetch(API_URL + "/api/health")
+        .then((res) => res.json())
+        .then((data) => {
+          document.getElementById("api").textContent =
+            data.status === "ok" ? "OK" : "erreur";
+          document.getElementById("db").textContent = data.db;
+        })
+        .catch((err) => {
+          document.getElementById("api").textContent =
+            "injoignable (" + err.message + ")";
+        });
+    </script>
+  </body>
 </html>
