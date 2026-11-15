@@ -1,0 +1,49 @@
+name: Deploy back end to Azure App Service
+
+on:
+  push:
+    branches: [main]
+    paths: ["backend/**"]
+  workflow_dispatch:
+
+concurrency:
+  group: azure-backend
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24 # même version que l'App Service (Node 24 LTS)
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm test --if-present
+
+  deploy:
+    needs: test # on ne déploie que si les tests passent
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Installer les dépendances de production
+        working-directory: ./backend
+        run: npm ci --omit=dev
+
+      - name: Déployer sur Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: delivery-api
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./backend
