@@ -1,0 +1,22 @@
+<header class="topbar">
+  <a class="brand" routerLink="/">
+    <app-logo [size]="30" />
+    <span>Food Corner</span>
+  </a>
+  <!-- Chaque story ajoute ses liens ici (ex. Carte et Menus composés avec US10). -->
+  <nav>
+    @if (auth.user(); as user) {
+      <span class="avatar" [title]="user.prenom + ' ' + user.nom">{{ user.prenom.charAt(0) }}{{ user.nom.charAt(0) }}</span>
+      <button type="button" class="nav-link" (click)="logout()">
+        <app-icon name="logout" [size]="16" /> Déconnexion
+      </button>
+    } @else {
+      <a class="nav-link" routerLink="/connexion" routerLinkActive="active">Connexion</a>
+      <a class="nav-cta" routerLink="/inscription">S'inscrire</a>
+    }
+  </nav>
+</header>
+
+<main>
+  <router-outlet />
+</main>
