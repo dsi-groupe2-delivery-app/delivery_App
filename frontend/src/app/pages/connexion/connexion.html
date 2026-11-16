@@ -1,0 +1,40 @@
+<section class="auth-split">
+  <app-brand-panel />
+
+  <div class="auth-form">
+    <h1>Se connecter</h1>
+    <p class="subtitle">Bon retour ! 👋</p>
+
+    @if (info()) {
+      <p class="alert alert-success" role="status">{{ info() }}</p>
+    }
+    @if (errorMessage()) {
+      <p class="alert alert-error" role="alert">{{ errorMessage() }}</p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="field">
+        <label class="input-icon" [class.invalid]="error('email')">
+          <app-icon name="mail" />
+          <input type="email" formControlName="email" placeholder="E-mail" aria-label="E-mail" autocomplete="email" />
+        </label>
+        @if (error('email')) { <p class="field-error">{{ error('email') }}</p> }
+      </div>
+
+      <div class="field">
+        <label class="input-icon" [class.invalid]="error('password')">
+          <app-icon name="lock" />
+          <input [type]="showPassword() ? 'text' : 'password'" formControlName="password" placeholder="Mot de passe" aria-label="Mot de passe" autocomplete="current-password" />
+          <button type="button" class="eye" (click)="showPassword.set(!showPassword())" [attr.aria-label]="showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'">
+            <app-icon [name]="showPassword() ? 'eye-off' : 'eye'" />
+          </button>
+        </label>
+        @if (error('password')) { <p class="field-error">{{ error('password') }}</p> }
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="sending()">Se connecter</button>
+    </form>
+
+    <p class="switch">Pas encore de compte ? <a routerLink="/inscription">S'inscrire</a></p>
+  </div>
+</section>
