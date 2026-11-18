@@ -1,0 +1,47 @@
+<%- include("partials/haut", { titre: "Carte : catégories et produits" }) %>
+
+<% if (message) { %>
+  <p class="succes"><%= message %></p>
+<% } %>
+
+<!-- Ajouter une catégorie -->
+<div class="bloc">
+  <h2>Nouvelle catégorie</h2>
+  <form method="POST" action="/admin/categories">
+    <label for="nom">Nom</label>
+    <input type="text" id="nom" name="nom" value="<%= valeurs.nom || '' %>">
+    <% if (erreurs.nom) { %><p class="erreur"><%= erreurs.nom %></p><% } %>
+
+    <label for="ordre">Ordre d'affichage (facultatif)</label>
+    <input type="number" id="ordre" name="ordre" min="0" value="<%= valeurs.ordre || '' %>">
+    <% if (erreurs.ordre) { %><p class="erreur"><%= erreurs.ordre %></p><% } %>
+
+    <button type="submit" class="bouton">Ajouter la catégorie</button>
+  </form>
+</div>
+
+<% if (categories.length > 0) { %>
+  <a href="/admin/produits/new" class="bouton" style="margin: 0 0 16px;">+ Ajouter un produit</a>
+<% } %>
+
+<!-- Chaque catégorie avec ses produits -->
+<% categories.forEach((categorie) => { %>
+  <div class="bloc">
+    <h2><%= categorie.nom %></h2>
+    <% if (categorie.produits.length === 0) { %>
+      <p class="indisponible">Aucun produit dans cette catégorie.</p>
+    <% } %>
+    <% categorie.produits.forEach((produit) => { %>
+      <div class="produit">
+        <img src="<%= produit.image ? '/uploads/' + produit.image : '/static/produit-defaut.svg' %>" alt="">
+        <div>
+          <strong><%= produit.nom %></strong>
+          <% if (!produit.disponible) { %><div class="indisponible">Indisponible</div><% } %>
+        </div>
+        <span class="prix"><%= millimesVersTnd(produit.prixMillimes) %> TND</span>
+      </div>
+    <% }) %>
+  </div>
+<% }) %>
+
+<%- include("partials/bas") %>
