@@ -96,6 +96,17 @@ test("US06 conversion TND <-> millimes", () => {
   assert.strictEqual(millimesVersTnd(12500), "12.500");
 });
 
+// ---------- Index (obligatoires pour les tris sur Cosmos DB) ----------
+
+test("US06 index : chaque tri utilisé a son index dans le modèle", async () => {
+  await Product.init();
+  const clesCategorie = (await Category.collection.indexes()).map((i) => JSON.stringify(i.key));
+  const clesProduit = (await Product.collection.indexes()).map((i) => JSON.stringify(i.key));
+
+  assert.ok(clesCategorie.includes(JSON.stringify({ ordre: 1, nom: 1 })));
+  assert.ok(clesProduit.includes(JSON.stringify({ nom: 1 })));
+});
+
 // ---------- Catégories ----------
 
 test("US06 catégorie : création valide puis affichage dans la liste", async () => {
