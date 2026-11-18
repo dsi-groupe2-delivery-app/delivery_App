@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 
 const { requireAuth, requireRole } = require("../middlewares/auth");
+const catalogue = require("../controllers/catalogueController");
 
 const router = express.Router();
 
@@ -53,6 +54,12 @@ router.use(requireAuth, requireRole("admin"));
 router.get("/", (req, res) => {
   res.render("admin", { agent: req.user });
 });
+
+// US06 : catégories et produits de la carte
+router.get("/categories", catalogue.listeCategories);
+router.post("/categories", catalogue.creerCategorie);
+router.get("/produits/new", catalogue.nouveauProduit);
+router.post("/produits", catalogue.creerProduit);
 
 // POST /admin/logout : déconnexion puis retour à la page de connexion
 router.post("/logout", (req, res, next) => {

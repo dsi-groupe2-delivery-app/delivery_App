@@ -1,0 +1,64 @@
+<%- include("partials/haut", { titre: "Nouveau produit" }) %>
+
+<div class="bloc">
+  <h2>Nouveau produit</h2>
+
+  <% if (categories.length === 0) { %>
+    <!-- Impossible d'ajouter un produit sans catégorie -->
+    <p>Aucune catégorie n'existe encore. Créez d'abord une catégorie.</p>
+    <a href="/admin/categories" class="bouton">Créer une catégorie</a>
+  <% } else { %>
+    <!-- enctype obligatoire pour envoyer un fichier (image) -->
+    <form method="POST" action="/admin/produits" enctype="multipart/form-data">
+      <label for="nom">Nom</label>
+      <input type="text" id="nom" name="nom" value="<%= valeurs.nom || '' %>">
+      <% if (erreurs.nom) { %><p class="erreur"><%= erreurs.nom %></p><% } %>
+
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="3"><%= valeurs.description || '' %></textarea>
+
+      <label for="prix">Prix (TND)</label>
+      <input type="text" id="prix" name="prix" placeholder="12.500" value="<%= valeurs.prix || '' %>">
+      <% if (erreurs.prix) { %><p class="erreur"><%= erreurs.prix %></p><% } %>
+
+      <label for="categorie">Catégorie</label>
+      <select id="categorie" name="categorie">
+        <option value="">-- Choisir --</option>
+        <% categories.forEach((categorie) => { %>
+          <option value="<%= categorie._id %>" <%= String(categorie._id) === valeurs.categorie ? 'selected' : '' %>>
+            <%= categorie.nom %>
+          </option>
+        <% }) %>
+      </select>
+      <% if (erreurs.categorie) { %><p class="erreur"><%= erreurs.categorie %></p><% } %>
+
+      <label for="image">Image (jpg, png ou webp, 2 Mo maximum)</label>
+      <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp">
+      <% if (erreurs.image) { %><p class="erreur"><%= erreurs.image %></p><% } %>
+      <img id="apercu" alt="" style="display: none; max-width: 160px; margin-top: 8px; border-radius: 4px;">
+
+      <label>
+        <input type="checkbox" name="disponible" <%= valeurs.disponible === 'on' ? 'checked' : '' %>>
+        Disponible
+      </label>
+
+      <button type="submit" class="bouton">Ajouter le produit</button>
+    </form>
+
+    <script>
+      // Aperçu de l'image choisie, avant l'envoi
+      document.getElementById("image").addEventListener("change", (event) => {
+        const fichier = event.target.files[0];
+        const apercu = document.getElementById("apercu");
+        if (fichier) {
+          apercu.src = URL.createObjectURL(fichier);
+          apercu.style.display = "block";
+        } else {
+          apercu.style.display = "none";
+        }
+      });
+    </script>
+  <% } %>
+</div>
+
+<%- include("partials/bas") %>

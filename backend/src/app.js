@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const { sessionMiddleware, cookieOptions, COOKIE_NAME } = require("./config/session");
 const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
+const { UPLOADS_DIR } = require("./config/upload");
 
 const app = express();
 
@@ -25,7 +26,12 @@ if (process.env.FRONT_URL) allowedOrigins.push(process.env.FRONT_URL);
 
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: false })); // formulaires HTML du Back-Office
 app.use(sessionMiddleware());
+
+// Fichiers publics : images des produits (US06) et image par défaut.
+app.use("/uploads", express.static(UPLOADS_DIR));
+app.use("/static", express.static(path.join(__dirname, "public")));
 
 // Vues EJS (back-office restaurant)
 app.set("view engine", "ejs");
@@ -47,7 +53,7 @@ app.get("/api/health", health); // même route sous /api pour les fronts
 // Authentification (US01, US02)
 app.use("/api/auth", authRoutes);
 
-// Back-Office de l'agent (US03)
+// Back-Office de l'agent (US03, US06)
 app.use("/admin", adminRoutes);
 
 // Erreurs non gérées : réponse générique, sans détail technique pour le client.
