@@ -61,13 +61,21 @@ async function creerCompte(role, email) {
   });
 }
 
-test("US03 agent connecté : accès au Back-Office avec son nom", async () => {
+test("US03 page de connexion de l'agent : formulaire EJS affiché", async () => {
+  const page = await navigateur()("GET", "/admin/connexion");
+  assert.strictEqual(page.status, 200);
+  assert.match(page.text, /Espace réservé aux agents/);
+  assert.match(page.text, /action="\/admin\/connexion"/);
+});
+
+test("US03 agent : connexion sur la page EJS puis accès au Back-Office avec son nom", async () => {
   await creerCompte("admin", "agent@mail.com");
   const call = navigateur();
 
-  const login = await call("POST", "/api/auth/login", { email: "agent@mail.com", password: "secret123" });
-  assert.strictEqual(login.status, 200);
-  assert.strictEqual(JSON.parse(login.text).redirect, "/admin");
+  // E-mail en majuscules : la casse est ignorée.
+  const login = await call("POST", "/admin/connexion", { email: "Agent@Mail.com", password: "secret123" });
+  assert.strictEqual(login.status, 302);
+  assert.strictEqual(login.location, "/admin");
 
   const page = await call("GET", "/admin");
   assert.strictEqual(page.status, 200);
@@ -75,10 +83,31 @@ test("US03 agent connecté : accès au Back-Office avec son nom", async () => {
   assert.match(page.text, /Sami Trabelsi/);
 });
 
-test("US03 visiteur non connecté : redirigé vers la page de connexion", async () => {
+test("US03 mauvais mot de passe : message d'erreur, pas d'accès", async () => {
+  await creerCompte("admin", "agent@mail.com");
+  const call = navigateur();
+
+  const login = await call("POST", "/admin/connexion", { email: "agent@mail.com", password: "faux" });
+  assert.strictEqual(login.status, 401);
+  assert.match(login.text, /Identifiants incorrects/);
+  assert.match(login.text, /value="agent@mail.com"/); // l'e-mail saisi est conservé
+
+  assert.strictEqual((await call("GET", "/admin")).status, 302);
+});
+
+test("US03 un client ne peut pas se connecter sur la page de l'agent", async () => {
+  await creerCompte("client", "client@mail.com");
+  const call = navigateur();
+
+  const login = await call("POST", "/admin/connexion", { email: "client@mail.com", password: "secret123" });
+  assert.strictEqual(login.status, 401);
+  assert.strictEqual((await call("GET", "/admin")).status, 302);
+});
+
+test("US03 visiteur non connecté : redirigé vers la page de connexion de l'agent", async () => {
   const page = await navigateur()("GET", "/admin");
   assert.strictEqual(page.status, 302);
-  assert.match(page.location, /\/connexion$/);
+  assert.strictEqual(page.location, "/admin/connexion");
 });
 
 test("US03 client connecté : accès au Back-Office refusé (403)", async () => {
@@ -93,11 +122,11 @@ test("US03 client connecté : accès au Back-Office refusé (403)", async () => 
 test("US03 déconnexion : retour à la connexion, le Back-Office n'est plus accessible", async () => {
   await creerCompte("admin", "agent@mail.com");
   const call = navigateur();
-  await call("POST", "/api/auth/login", { email: "agent@mail.com", password: "secret123" });
+  await call("POST", "/admin/connexion", { email: "agent@mail.com", password: "secret123" });
 
   const logout = await call("POST", "/admin/logout");
   assert.strictEqual(logout.status, 302);
-  assert.match(logout.location, /\/connexion$/);
+  assert.strictEqual(logout.location, "/admin/connexion");
 
   const page = await call("GET", "/admin");
   assert.strictEqual(page.status, 302);
