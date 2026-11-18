@@ -111,3 +111,91 @@ exports.create = async (req, res, next) => {
     next(e);
   }
 };
+function menuToValues(menu) {
+  const m = menu.toObject ? menu.toObject() : menu;
+  return {
+    nom: m.nom,
+    description: m.description || '',
+    prixBase: m.prixBase,
+    disponible: m.disponible,
+    image: m.image || null,
+    groupes: [...m.groupes]
+      .sort((a, b) => a.ordre - b.ordre)
+      .map((g) => ({
+        _id: String(g._id),
+        libelle: g.libelle,
+        min: g.min,
+        max: g.max,
+        options: g.options.map((o) => ({ produit: String(o.produit), supplement: o.supplement })),
+      })),
+  };
+}
+
+exports.editForm = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!OBJECT_ID.test(id)) return notFound(res);
+    const menu = await MenuCompose.findById(id);
+    if (!menu) return notFound(res);
+    await renderForm(res, { isEdit: true, menuId: id, values: menuToValues(menu) });
+  } catch (e) {
+    next(e);
+  }
+};
+
+exports.update = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!OBJECT_ID.test(id)) return notFound(res);
+    const menu = await MenuCompose.findById(id);
+    if (!menu) return notFound(res);
+
+    const data = normalizeMenuBody(req.body);
+    // On ne garde que les _id de groupes qui appartiennent bien à ce menu
+    const known = new Set(menu.groupes.map((g) => String(g._id)));
+    data.groupes.forEach((g) => {
+      if (g._id && !known.has(g._id)) delete g._id;
+    });
+
+    const errors = await validateAll(data, id);
+    if (req.uploadError) errors.image = req.uploadError;
+
+    if (Object.keys(errors).length) {
+      removeFile(req.file);
+      return renderForm(res, {
+        status: 422,
+        isEdit: true,
+        menuId: id,
+        values: { ...data, image: menu.image || null },
+        errors,
+      });
+    }
+
+    const oldImage = menu.image;
+    menu.set({
+      nom: data.nom,
+      description: data.description,
+      prixBase: data.prixBase,
+      disponible: data.disponible,
+      groupes: data.groupes, // sous-document remplacé ; les commandes existantes gardent leur snapshot
+    });
+    if (req.file) menu.image = `/uploads/menus/${req.file.filename}`;
+    await menu.save();
+    if (req.file) removeImageByUrl(oldImage); // nouvelle image : l'ancienne est supprimée
+
+    setFlash(req, 'success', 'Menu composé modifié avec succès.');
+    res.redirect(BASE);
+  } catch (e) {
+    removeFile(req.file);
+    if (e.code === 11000) {
+      return renderForm(res, {
+        status: 422,
+        isEdit: true,
+        menuId: req.params.id,
+        values: normalizeMenuBody(req.body),
+        errors: { nom: 'Ce nom de menu existe déjà' },
+      });
+    }
+    next(e);
+  }
+};

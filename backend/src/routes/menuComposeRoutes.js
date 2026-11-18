@@ -7,4 +7,6 @@ router.use(requireRole("admin"));
 router.get('/', ctrl.list);
 router.get('/new', ctrl.newForm);
 router.post('/', uploadMenuImage, ctrl.create);
+router.get('/:id/edit', ctrl.editForm);
+router.put('/:id', uploadMenuImage, ctrl.update);
 module.exports = router;
