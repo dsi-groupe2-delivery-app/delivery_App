@@ -7,7 +7,7 @@ async function call(path) {
   const server = app.listen(0);
   const { port } = server.address();
   try {
-    return await fetch(`http://localhost:${port}${path}`);
+    return await fetch(`http://localhost:${port}${path}`, { redirect: "manual" });
   } finally {
     server.close();
   }
@@ -27,9 +27,8 @@ test("GET /api/health returns ok", async () => {
   assert.strictEqual((await res.json()).status, "ok");
 });
 
-test("GET /admin renders the EJS back-office page", async () => {
+test("GET /admin sans connexion redirige vers la page de connexion", async () => {
   const res = await call("/admin");
-  const html = await res.text();
-  assert.strictEqual(res.status, 200);
-  assert.match(html, /Back-office restaurant/);
+  assert.strictEqual(res.status, 302);
+  assert.match(res.headers.get("location"), /\/connexion$/);
 });
