@@ -4,6 +4,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const { sessionMiddleware, cookieOptions, COOKIE_NAME } = require("./config/session");
 const authRoutes = require("./routes/auth");
+const adminRoutes = require("./routes/admin");
 
 const app = express();
 
@@ -46,13 +47,8 @@ app.get("/api/health", health); // même route sous /api pour les fronts
 // Authentification (US01, US02)
 app.use("/api/auth", authRoutes);
 
-// Test d'infrastructure : le rendu EJS du back-office fonctionne
-app.get("/admin", (req, res) => {
-  res.render("admin", {
-    db: DB_STATES[mongoose.connection.readyState] || "unknown",
-    date: new Date().toLocaleString("fr-FR"),
-  });
-});
+// Back-Office de l'agent (US03)
+app.use("/admin", adminRoutes);
 
 // Erreurs non gérées : réponse générique, sans détail technique pour le client.
 // eslint-disable-next-line no-unused-vars

@@ -8,6 +8,7 @@
   },
   "scripts": {
     "start": "node src/server.js",
+    "create-admin": "node src/scripts/createAdmin.js",
     "test": "node --test"
   },
   "keywords": [],
