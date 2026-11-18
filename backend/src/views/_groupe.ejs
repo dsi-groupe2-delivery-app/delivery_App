@@ -1,0 +1,26 @@
+<%# locals : g, ge (erreurs du groupe), produits %>
+<section class="groupe" data-groupe>
+  <input type="hidden" data-gfield="_id" value="<%= g._id || '' %>">
+  <div class="groupe-head">
+    <label>Libellé <input type="text" data-gfield="libelle" value="<%= g.libelle %>"></label>
+    <label>Min <input type="number" min="0" data-gfield="min" value="<%= Number.isFinite(g.min) ? g.min : '' %>"></label>
+    <label>Max <input type="number" min="1" data-gfield="max" value="<%= Number.isFinite(g.max) ? g.max : '' %>"></label>
+    <span class="tools">
+      <button type="button" data-action="up" title="Monter">↑</button>
+      <button type="button" data-action="down" title="Descendre">↓</button>
+      <button type="button" data-action="remove-group" title="Supprimer le groupe">✕</button>
+    </span>
+  </div>
+  <% if (ge.libelle) { %><div class="err"><%= ge.libelle %></div><% } %>
+  <% if (ge.min) { %><div class="err"><%= ge.min %></div><% } %>
+
+  <div class="options" data-options>
+    <% g.options.forEach((o, j) => { %>
+      <%- include('_option', { o, produits, oe: (ge.items && ge.items[j]) || '' }) %>
+    <% }) %>
+  </div>
+  <div class="err" data-live="max" <%= ge.max ? '' : 'hidden' %>><%= ge.max || '' %></div>
+  <% if (ge.options) { %><div class="err"><%= ge.options %></div><% } %>
+  <div class="warn" data-live="single" <%= g.options.length === 1 ? '' : 'hidden' %>>⚠ Une seule option : ce n'est plus un choix</div>
+  <button type="button" class="link" data-action="add-option">+ Ajouter une option (produit existant, une seule fois par groupe)</button>
+</section>

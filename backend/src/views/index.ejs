@@ -1,0 +1,29 @@
+
+<%- include('partials/haut', { titre: 'Menus composés' }) %>
+  <div class="page-head">
+    <h1>Menus composés</h1>
+    <a class="btn" href="/admin/menus-composes/new">+ Nouveau menu</a>
+  </div>
+  <% if (flash) { %><div class="flash <%= flash.type %>"><%= flash.message %></div><% } %>
+
+  <table class="grid">
+    <thead><tr><th>Nom</th><th>Prix de base</th><th>Groupes</th><th>Statut</th><th>Action</th></tr></thead>
+    <tbody>
+    <% if (!menus.length) { %>
+      <tr><td colspan="5">Aucun menu composé pour le moment.</td></tr>
+    <% } %>
+    <% menus.forEach(m => { %>
+      <tr>
+        <td><%= m.nom %></td>
+        <td><%= m.prixBase.toFixed(3) %> TND</td>
+        <td><%= m.groupes.map(g => g.libelle).join(' - ') %></td>
+        <td title="<%= m.statut.raison || '' %>"><%= m.statut.disponible ? 'Disponible' : 'Indisponible' %></td>
+        <td><a href="/admin/menus-composes/<%= m._id %>/edit">Modifier</a></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <p class="note">« Indisponible » : désactivé, ou un groupe n'atteint plus son minimum.</p>
+</main>
+</body>
+</html>

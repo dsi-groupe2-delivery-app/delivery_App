@@ -1,0 +1,10 @@
+const ctrl = require('../controllers/menuComposeController');
+const uploadMenuImage = require('../middlewares/uploadMenuImage');
+const express = require('express');
+const router = express.Router();
+const { requireRole } = require('../middlewares/auth');
+router.use(requireRole("admin"));
+router.get('/', ctrl.list);
+router.get('/new', ctrl.newForm);
+router.post('/', uploadMenuImage, ctrl.create);
+module.exports = router;

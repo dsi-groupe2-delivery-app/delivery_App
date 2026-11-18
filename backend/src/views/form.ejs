@@ -1,0 +1,167 @@
+<%# Formulaire partagé US08 (création) / US09 (modification) %>
+<%
+  const err = errors || {};
+  const action = isEdit ? `/admin/menus-composes/${menuId}?_method=PUT` : '/admin/menus-composes';
+  const geOf = (i) => (err.groupes && err.groupes[i]) || {};
+  const num = (v) => (Number.isFinite(Number(v)) && v !== '' ? v : '');
+%>
+<%- include('partials/haut', { titre: title }) %>  <h1><%= title %></h1>
+  <% if (produitsIndisponibles && produitsIndisponibles.length) { %>
+    <div class="warn box">
+      <% produitsIndisponibles.forEach(n => { %>
+        ⚠ Le produit « <%= n %> » est indisponible : il ne sera pas proposé au client.<br>
+      <% }) %>
+    </div>
+  <% } %>
+  <% if (err.general) { %><div class="err box"><%= err.general %></div><% } %>
+  <form method="post" action="<%= action %>" enctype="multipart/form-data" novalidate class="menu-form">
+    <input type="hidden" name="__hasImage" value="0">
+    <div class="cols">
+      <div class="col-left">
+        <label>Nom *
+          <input type="text" name="nom" value="<%= values.nom %>">
+        </label>
+        <% if (err.nom) { %><div class="err"><%= err.nom %></div><% } else { %><div class="hint">Unique</div><% } %>
+        <label>Description
+          <input type="text" name="description" value="<%= values.description %>">
+        </label>
+        <label>Prix de base (TND) *
+          <input type="number" step="0.001" min="0" name="prixBase" value="<%= num(values.prixBase) %>">
+        </label>
+        <% if (err.prixBase) { %><div class="err"><%= err.prixBase %></div><% } else { %><div class="hint">&gt; 0</div><% } %>
+        <label>Image
+          <input type="file" name="image" accept="image/jpeg,image/png,image/webp">
+        </label>
+        <% if (values.image) { %><div class="hint">Image actuelle : <a href="<%= values.image %>" target="_blank">voir</a> (une nouvelle image remplace l'ancienne)</div><% } %>
+        <% if (err.image) { %><div class="err"><%= err.image %></div><% } else { %><div class="hint">jpg, png ou webp – 2 Mo maximum</div><% } %>
+        <label class="check"><input type="checkbox" name="disponible" value="on" <%= values.disponible ? 'checked' : '' %>> Disponible</label>
+        <div class="hint">Prix final = prix de base + suppléments des options choisies</div>
+        <div class="actions">
+          <a class="btn" href="/admin/menus-composes">Annuler</a>
+          <button class="btn primary" type="submit">Enregistrer</button>
+        </div>
+      </div>
+      <div class="col-right">
+        <h2>Groupes (au moins 1)</h2>
+        <div id="groupes">
+          <% values.groupes.forEach((g, i) => { %>
+            <%- include('_groupe', { g, ge: geOf(i), produits }) %>
+          <% }) %>
+        </div>
+        <button type="button" class="btn" data-action="add-group">+ Ajouter un groupe</button>
+        <span class="hint">Min ≥ 0 · Max ≥ 1, ≥ Min et ≤ nombre d'options</span>
+      </div>
+    </div>
+  </form>
+  <%# Modèles clonés par le JavaScript %>
+  <template id="tpl-groupe">
+    <%- include('_groupe', { g: { libelle: '', min: 1, max: 1, options: [{ produit: '', supplement: 0 }] }, ge: {}, produits }) %>
+  </template>
+  <template id="tpl-option">
+    <%- include('_option', { o: { produit: '', supplement: 0 }, produits, oe: '' }) %>
+  </template>
+</main>
+<script >
+  (function () {
+  const root = document.getElementById('groupes');
+  if (!root) return;
+  const form = root.closest('form');
+  const tplGroupe = document.getElementById('tpl-groupe');
+  const tplOption = document.getElementById('tpl-option');
+  const fileInput = form.querySelector('input[type=file][name=image]');
+  const hasImage = form.querySelector('input[name=__hasImage]');
+
+  const groupes = () => [...root.querySelectorAll(':scope > [data-groupe]')];
+  const optionsOf = (g) => [...g.querySelectorAll('[data-option]')];
+
+  function reindex() {
+    groupes().forEach((g, i) => {
+      g.querySelectorAll('[data-gfield]').forEach((el) => (el.name = `groupes[${i}][${el.dataset.gfield}]`));
+      optionsOf(g).forEach((o, j) => {
+        o.querySelectorAll('[data-ofield]').forEach(
+          (el) => (el.name = `groupes[${i}][options][${j}][${el.dataset.ofield}]`)
+        );
+      });
+    });
+  }
+  function refresh() {
+    reindex();
+    const gs = groupes();
+    gs.forEach((g, i) => {
+      const opts = optionsOf(g);
+      const n = opts.length;
+      const max = parseInt(g.querySelector('[data-gfield=max]').value, 10);
+
+      g.querySelector('[data-live=single]').hidden = n !== 1;
+      const liveMax = g.querySelector('[data-live=max]');
+      if (Number.isInteger(max) && max > n) {
+        liveMax.textContent = `Le maximum (${max}) dépasse le nombre d'options (${n})`;
+        liveMax.hidden = false;
+      } else if (!liveMax.dataset.server) {
+        liveMax.hidden = true;
+      }
+      const chosen = opts.map((o) => o.querySelector('[data-ofield=produit]').value).filter(Boolean);
+      opts.forEach((o) => {
+        const sel = o.querySelector('[data-ofield=produit]');
+        [...sel.options].forEach((opt) => {
+          opt.disabled = !!opt.value && opt.value !== sel.value && chosen.includes(opt.value);
+        });
+        o.querySelector('[data-action=remove-option]').disabled = n <= 1;
+      });
+
+      g.querySelector('[data-action=up]').disabled = i === 0;
+      g.querySelector('[data-action=down]').disabled = i === gs.length - 1;
+      g.querySelector('[data-action=remove-group]').disabled = gs.length <= 1;
+    });
+  }
+  function addGroup() {
+    root.appendChild(tplGroupe.content.cloneNode(true));
+    refresh();
+  }
+  form.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const g = btn.closest('[data-groupe]');
+    switch (btn.dataset.action) {
+      case 'add-group':
+        addGroup();
+        break;
+      case 'remove-group':
+        if (groupes().length > 1) g.remove();
+        break;
+      case 'up': {
+        const prev = g.previousElementSibling;
+        if (prev && prev.hasAttribute('data-groupe')) root.insertBefore(g, prev);
+        break;
+      }
+      case 'down': {
+        const next = g.nextElementSibling;
+        if (next && next.hasAttribute('data-groupe')) next.after(g);
+        break;
+      }
+      case 'add-option':
+        g.querySelector('[data-options]').appendChild(tplOption.content.cloneNode(true));
+        break;
+      case 'remove-option':
+        if (optionsOf(g).length > 1) btn.closest('[data-option]').remove();
+        break;
+      default:
+        return;
+    }
+    refresh();
+  });
+
+  form.addEventListener('input', refresh);
+  form.addEventListener('change', refresh);
+  if (fileInput && hasImage) {
+    fileInput.addEventListener('change', () => (hasImage.value = fileInput.files.length ? '1' : '0'));
+  }
+  root.querySelectorAll('[data-live=max]').forEach((el) => {
+    if (!el.hidden) el.dataset.server = '1';
+  });
+  refresh();
+})();
+
+</script>
+</body>
+</html>
