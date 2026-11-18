@@ -12,6 +12,10 @@ const categorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Index du tri .sort({ ordre: 1, nom: 1 }) : obligatoire sur Cosmos DB (production).
+// Règle de l'équipe : chaque nouveau .sort() doit avoir son index dans le modèle.
+categorySchema.index({ ordre: 1, nom: 1 });
+
 // Rempli automatiquement avant chaque enregistrement.
 categorySchema.pre("validate", function () {
   if (this.nom) this.nomMinuscule = this.nom.trim().toLowerCase();
