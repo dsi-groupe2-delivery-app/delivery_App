@@ -7,8 +7,6 @@
 // Après requireAuth, l'utilisateur connecté est disponible dans req.user.
 const User = require("../models/User");
 
-const FRONT_URL = () => process.env.FRONT_URL || "http://localhost:4200";
-
 // Les routes /api répondent en JSON ; les pages (Back-Office EJS) redirigent.
 function isApi(req) {
   return req.originalUrl.startsWith("/api/");
@@ -18,7 +16,8 @@ function unauthorized(req, res) {
   if (isApi(req)) {
     return res.status(401).json({ message: "Authentification requise" });
   }
-  return res.redirect(`${FRONT_URL()}/connexion`);
+  // Les pages EJS sont celles du Back-Office : on renvoie vers la connexion de l'agent.
+  return res.redirect("/admin/connexion");
 }
 
 async function requireAuth(req, res, next) {
