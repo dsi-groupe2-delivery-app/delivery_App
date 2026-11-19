@@ -27,7 +27,6 @@
       const opts = optionsOf(g);
       const n = opts.length;
       const max = parseInt(g.querySelector('[data-gfield=max]').value, 10);
-
       g.querySelector('[data-live=single]').hidden = n !== 1;
       const liveMax = g.querySelector('[data-live=max]');
       if (Number.isInteger(max) && max > n) {

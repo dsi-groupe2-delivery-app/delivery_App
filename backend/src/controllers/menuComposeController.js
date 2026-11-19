@@ -6,7 +6,6 @@ const { validateMenuStructure, findSingleOptionGroups } = require('../validators
 const { normalizeMenuBody, OBJECT_ID } = require('../validators/menuComposeForm');
 const { getEffectiveAvailability, getProduitsIndisponibles } = require('../utils/availability');
 const BASE = '/admin/menus-composes';
-const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const EMPTY_VALUES = () => ({
   nom: '',
   description: '',
@@ -21,18 +20,16 @@ function removeFile(file) {
 function setFlash(req, type, message) {
   if (req.session) req.session.flash = { type, message };
 }
-function notFound(res) {
-  return res.status(404).render('errors/404', { message: 'Menu composé introuvable' });
-}
 const loadProduits = () => Product.find().sort({ nom: 1 }).select('nom disponible').lean();
 async function validateAll(data, excludeId) {
   const errors = validateMenuStructure(data);
 
   if (!errors.nom && data.nom) {
-    const filter = { nom: new RegExp(`^${escapeRegex(data.nom)}$`, 'i') };
-    if (excludeId) filter._id = { $ne: excludeId }; // US09 : ignore le menu en cours d'édition
+    const filter = { nomMinuscule: data.nom.toLowerCase() };
+    if (excludeId) filter._id = { $ne: excludeId };
     if (await MenuCompose.exists(filter)) errors.nom = 'Ce nom de menu existe déjà';
   }
+
   const ids = [...new Set(data.groupes.flatMap((g) => g.options.map((o) => o.produit)).filter(Boolean))];
   const found = new Set((await Product.find({ _id: { $in: ids } }).select('_id').lean()).map((p) => String(p._id)));
   data.groupes.forEach((g, i) =>
@@ -50,7 +47,7 @@ async function validateAll(data, excludeId) {
 async function renderForm(res, { status = 200, isEdit = false, menuId = null, values, errors = {} }) {
   const produits = await loadProduits();
   const byId = new Map(produits.map((p) => [String(p._id), p]));
-    const titre = isEdit ? `Modifier : ${values.nom || 'menu composé'}` : 'Nouveau menu composé';
+  const titre = isEdit ? `Modifier : ${values.nom || 'menu composé'}` : 'Nouveau menu composé';
   res.status(status).render('form', {
     title: titre,
     titre,
@@ -77,7 +74,8 @@ exports.list = async (req, res, next) => {
     const flash = req.session && req.session.flash;
     if (req.session) delete req.session.flash;
     res.render('index', { title: 'Menus composés', titre: 'Menus composés', menus: rows, flash });
-  } catch (e) {    next(e);
+  } catch (e) {
+    next(e);
   }
 };
 exports.newForm = async (req, res, next) => {
@@ -93,10 +91,14 @@ exports.create = async (req, res, next) => {
     const errors = await validateAll(data);
     if (req.uploadError) errors.image = req.uploadError;
     if (Object.keys(errors).length) {
-      removeFile(req.file); // erreur : rien n'est créé
+      removeFile(req.file);
       return renderForm(res, { status: 422, values: data, errors });
     }
-    await MenuCompose.create({ ...data, image: req.file ? `/uploads/menus/${req.file.filename}` : undefined });
+    await MenuCompose.create({
+      ...data,
+      nomMinuscule: data.nom.toLowerCase(),
+      image: req.file ? `/uploads/menus/${req.file.filename}` : undefined,
+    });
     setFlash(req, 'success', 'Menu composé créé avec succès.');
     res.redirect(BASE);
   } catch (e) {
@@ -130,7 +132,6 @@ function menuToValues(menu) {
       })),
   };
 }
-
 exports.editForm = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -142,7 +143,6 @@ exports.editForm = async (req, res, next) => {
     next(e);
   }
 };
-
 exports.update = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -151,15 +151,12 @@ exports.update = async (req, res, next) => {
     if (!menu) return notFound(res);
 
     const data = normalizeMenuBody(req.body);
-    // On ne garde que les _id de groupes qui appartiennent bien à ce menu
     const known = new Set(menu.groupes.map((g) => String(g._id)));
     data.groupes.forEach((g) => {
       if (g._id && !known.has(g._id)) delete g._id;
     });
-
     const errors = await validateAll(data, id);
     if (req.uploadError) errors.image = req.uploadError;
-
     if (Object.keys(errors).length) {
       removeFile(req.file);
       return renderForm(res, {
@@ -170,18 +167,18 @@ exports.update = async (req, res, next) => {
         errors,
       });
     }
-
     const oldImage = menu.image;
     menu.set({
       nom: data.nom,
+      nomMinuscule: data.nom.toLowerCase(),
       description: data.description,
       prixBase: data.prixBase,
       disponible: data.disponible,
-      groupes: data.groupes, // sous-document remplacé ; les commandes existantes gardent leur snapshot
+      groupes: data.groupes,
     });
     if (req.file) menu.image = `/uploads/menus/${req.file.filename}`;
     await menu.save();
-    if (req.file) removeImageByUrl(oldImage); // nouvelle image : l'ancienne est supprimée
+    if (req.file) removeImageByUrl(oldImage);
 
     setFlash(req, 'success', 'Menu composé modifié avec succès.');
     res.redirect(BASE);

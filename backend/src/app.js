@@ -26,6 +26,8 @@ if (process.env.FRONT_URL) allowedOrigins.push(process.env.FRONT_URL);
 
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
+const methodOverride = require('method-override');
+app.use(methodOverride('_method'));
 app.use(express.urlencoded({ extended: false })); // formulaires HTML du Back-Office
 app.use(sessionMiddleware());
 
@@ -65,9 +67,5 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Erreur interne du serveur" });
 });
 // travaille de lina 
-const methodOverride = require('method-override');
-app.use(express.urlencoded({ extended: true }));        
-app.use(methodOverride('_method'));                     
 app.use('/admin/menus-composes', require('./routes/menuComposeRoutes'));
-// fin du travaille de lina
 module.exports = app;

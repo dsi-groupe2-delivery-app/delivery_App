@@ -20,6 +20,7 @@ const groupeSchema = new mongoose.Schema({
 const menuComposeSchema = new mongoose.Schema(
   {
     nom: { type: String, required: true, trim: true, maxlength: 100 },
+    nomMinuscule: { type: String, required: true, unique: true, trim: true },
     description: { type: String, trim: true, maxlength: 500 },
     prixBase: { type: Number, required: true, min: 0.001 },
     image: { type: String },
@@ -31,7 +32,7 @@ const menuComposeSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-menuComposeSchema.index({ nom: 1 }, { unique: true, collation: { locale: 'fr', strength: 2 } });
+menuComposeSchema.index({ nom: 1 });
 menuComposeSchema.pre('validate', function () {
   const errors = validateMenuStructure(this.toObject());
   if (Object.keys(errors).length) {

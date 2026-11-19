@@ -17,8 +17,7 @@
         <td><%= m.nom %></td>
         <td><%= m.prixBase.toFixed(3) %> TND</td>
         <td><%= m.groupes.map(g => g.libelle).join(' - ') %></td>
-        <td title="<%= m.statut.raison || '' %>"><%= m.statut.disponible ? 'Disponible' : 'Indisponible' %></td>
- // ajouter modifier 
+        <td title="<%= m.statut.raison || '' %>"><%= m.statut.disponible ? 'Disponible' : 'Indisponible' %></td> 
         <td><a href="/admin/menus-composes/<%= m._id %>/edit">Modifier</a></td>
       </tr>
     <% }) %>
