@@ -1,0 +1,16 @@
+<%# locals : o, produits, oe (message d'erreur ou '') %>
+<div class="option-row" data-option>
+  <select data-ofield="produit">
+    <option value="">Choisir un produit</option>
+    <% produits.forEach(p => { %>
+      <option value="<%= p._id %>" <%= String(p._id) === String(o.produit) ? 'selected' : '' %>>
+        <%= p.nom %><%= p.disponible === false ? ' (indisponible)' : '' %>
+      </option>
+    <% }) %>
+  </select>
+  <label>Supplément :
+    <input type="number" step="0.001" min="0" data-ofield="supplement" value="<%= o.supplement %>"> TND
+  </label>
+  <button type="button" data-action="remove-option" title="Retirer l'option">✕</button>
+  <% if (oe) { %><div class="err"><%= oe %></div><% } %>
+</div>

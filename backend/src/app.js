@@ -26,6 +26,8 @@ if (process.env.FRONT_URL) allowedOrigins.push(process.env.FRONT_URL);
 
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
+const methodOverride = require('method-override');
+app.use(methodOverride('_method'));
 app.use(express.urlencoded({ extended: false })); // formulaires HTML du Back-Office
 app.use(sessionMiddleware());
 
@@ -49,7 +51,9 @@ const health = (req, res) => {
 };
 app.get("/health", health);
 app.get("/api/health", health); // même route sous /api pour les fronts
-
+app.get("/js/menu-compose-form.js", (req, res) => {
+  res.sendFile(path.join(__dirname, "scripts", "menu-compose-form.js"));
+});
 // Authentification (US01, US02)
 app.use("/api/auth", authRoutes);
 
@@ -62,5 +66,6 @@ app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ message: "Erreur interne du serveur" });
 });
-
+// travaille de lina 
+app.use('/admin/menus-composes', require('./routes/menuComposeRoutes'));
 module.exports = app;
