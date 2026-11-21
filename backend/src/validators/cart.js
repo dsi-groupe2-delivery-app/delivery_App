@@ -1,4 +1,4 @@
-// US11 : contrôle de saisie du panier (middleware express-validator, comme validators/auth.js).
+// US11 / US12 : contrôle de saisie du panier (middleware express-validator, comme validators/auth.js).
 const { body, validationResult } = require("express-validator");
 
 const ID = /^[0-9a-fA-F]{24}$/;
@@ -17,6 +17,7 @@ function choixValide(valeur) {
 }
 
 const MSG_QUANTITE_AJOUT = "La quantité doit être un entier de 1 à 20";
+const MSG_QUANTITE_MODIF = "La quantité doit être un entier de 1 à 20 (0 supprime la ligne)";
 
 const ajoutRules = [
   body("type").isIn(["produit", "menu"]).withMessage("Type de ligne invalide (produit ou menu)"),
@@ -24,6 +25,13 @@ const ajoutRules = [
   body("menuId").if(body("type").equals("menu")).isMongoId().withMessage("Menu invalide"),
   body("quantite").optional().isInt({ min: 1, max: 20 }).withMessage(MSG_QUANTITE_AJOUT).toInt(),
   body("choix").if(body("type").equals("menu")).optional().custom(choixValide),
+];
+
+const modificationRules = [
+  body().custom((corps) => corps && (corps.quantite !== undefined || corps.choix !== undefined))
+    .withMessage("Indiquez une quantité ou des choix à modifier"),
+  body("quantite").optional().isInt({ min: 0, max: 20 }).withMessage(MSG_QUANTITE_MODIF).toInt(),
+  body("choix").optional().custom(choixValide),
 ];
 
 // Renvoie 400 avec { message, errors: { champ: message } }.
@@ -38,4 +46,4 @@ function valider(req, res, next) {
   return res.status(400).json({ message: Object.values(errors)[0], errors });
 }
 
-module.exports = { ajoutRules, valider };
+module.exports = { ajoutRules, modificationRules, valider };

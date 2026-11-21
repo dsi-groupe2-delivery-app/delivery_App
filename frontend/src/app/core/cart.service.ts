@@ -48,6 +48,19 @@ export class CartService {
     return this.envoyer(this.http.post<Panier>(`${API}/lignes`, { type: 'menu', menuId, choix, quantite }));
   }
 
+  /** quantite 0 supprime la ligne. */
+  modifierLigne(ligneId: string, changements: { quantite?: number; choix?: Choix }) {
+    return this.envoyer(this.http.patch<Panier>(`${API}/lignes/${ligneId}`, changements));
+  }
+
+  supprimerLigne(ligneId: string) {
+    return this.envoyer(this.http.delete<Panier>(`${API}/lignes/${ligneId}`));
+  }
+
+  vider() {
+    return this.envoyer(this.http.delete<Panier>(API));
+  }
+
   private async envoyer(requete: Observable<Panier>): Promise<Panier> {
     const panier = await firstValueFrom(requete);
     this._panier.set(panier);
