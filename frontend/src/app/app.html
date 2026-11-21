@@ -5,7 +5,20 @@
   </a>
   <!-- Chaque story ajoute ses liens ici (ex. Carte et Menus composés avec US10). -->
   <nav>
+    <a class="nav-link" routerLink="/carte" routerLinkActive="active">Carte</a>
+  <a class="nav-link" routerLink="/menus-composes" routerLinkActive="active">Menus composés</a>
+
     @if (auth.user(); as user) {
+      <a class="nav-link cart" routerLink="/panier" routerLinkActive="active"
+   aria-label="Panier">
+
+  <app-icon name="cart" [size]="20" />
+
+  <span class="cart-count">{{ cart.nombreArticles() }}</span>
+
+  <span class="cart-total">{{ cart.total() | tnd }}</span>
+
+</a>
       <span class="avatar" [title]="user.prenom + ' ' + user.nom">{{ user.prenom.charAt(0) }}{{ user.nom.charAt(0) }}</span>
       <button type="button" class="nav-link" (click)="logout()">
         <app-icon name="logout" [size]="16" /> Déconnexion
@@ -15,8 +28,7 @@
       <a class="nav-cta" routerLink="/inscription">S'inscrire</a>
     }
   </nav>
-  <a class="nav-link" routerLink="/carte" routerLinkActive="active">Carte</a>
-  <a class="nav-link" routerLink="/menus-composes" routerLinkActive="active">Menus composés</a>
+  
 </header>
 
 <main>

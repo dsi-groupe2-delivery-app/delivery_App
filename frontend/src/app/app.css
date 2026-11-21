@@ -73,10 +73,47 @@ nav {
 main {
   padding: 2rem 1rem;
 }
+main {
+  padding: 2rem 1rem;
+}
 
+/* Panier dans la navigation */
+.cart {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Nombre d'articles */
+.cart-count {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: white;
+  color: #c62828;
+  border: 1px solid #c62828;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Prix du panier */
+.cart-total {
+  background: #c62828;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
 @media (max-width: 600px) {
   .topbar { padding: 0.75rem 1rem; }
-  nav { gap: 0.6rem; }
+  nav { gap: 0.6rem;flex-wrap: wrap; justify-content: flex-end;  }
   .brand span { display: none; }
   main { padding: 1rem 0.75rem; }
+  .cart-total { display: none; }
 }
