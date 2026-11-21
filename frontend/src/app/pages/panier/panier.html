@@ -1,6 +1,10 @@
 <section class="panier">
     <h1>Mon panier</h1>
   
+    @if (erreur()) {
+      <div class="alert alert-error" role="alert">{{ erreur() }}</div>
+    }
+  
     @if (chargement()) {
       <p class="etat">Chargement du panier…</p>
     } @else if (!cart.panier() || cart.panier()!.lignes.length === 0) {
@@ -25,18 +29,61 @@
                 <p class="alerte" [class.prix]="a.type === 'prix_modifie'" role="alert">{{ a.message }}</p>
               }
               <p class="unitaire">{{ l.prixUnitaire | tnd }} l'unité</p>
+              @if (l.type === 'menu') {
+                <button type="button" class="lien" [disabled]="enCours()" (click)="modifierMenu(l)">Modifier le menu</button>
+              }
             </div>
   
             <div class="droite">
-              <p class="unitaire">Quantité : {{ l.quantite }}</p>
+              <div class="quantite" role="group" [attr.aria-label]="'Quantité de ' + l.nom">
+                <button type="button" class="rond" aria-label="Diminuer" [disabled]="enCours()" (click)="changerQuantite(l, -1)">−</button>
+                <input
+                  #q
+                  type="number"
+                  min="0"
+                  max="20"
+                  step="1"
+                  [value]="l.quantite"
+                  [disabled]="enCours()"
+                  (change)="saisirQuantite(l, q.valueAsNumber)"
+                />
+                <button type="button" class="rond" aria-label="Augmenter" [disabled]="enCours() || !l.disponible || l.quantite >= 20" (click)="changerQuantite(l, 1)">+</button>
+              </div>
               <p class="total-ligne">{{ l.totalLigne | tnd }}</p>
+              <button type="button" class="lien danger" [disabled]="enCours()" (click)="supprimer(l)">Supprimer</button>
             </div>
           </li>
+  
+          @if (edition(); as e) {
+            @if (e.ligne._id === l._id) {
+              <li class="edition">
+                <h3>Modifier « {{ e.menu.nom }} »</h3>
+                <app-menu-choix
+                  [menu]="e.menu"
+                  [valeurInitiale]="e.ligne.choixIds"
+                  [avecQuantite]="false"
+                  [avecAnnuler]="true"
+                  libelleBouton="Enregistrer les choix"
+                  [enCours]="enCours()"
+                  [erreur]="erreurEdition()"
+                  (valider)="enregistrerChoix($event.choix)"
+                  (annuler)="edition.set(null)"
+                />
+              </li>
+            }
+          }
         }
       </ul>
   
       <div class="resume">
         <p class="total">Total <strong>{{ panier.total | tnd }}</strong></p>
+        @if (confirmerVidage()) {
+          <p class="confirmation" role="alertdialog">Vider tout le panier ?</p>
+          <button type="button" class="btn danger-btn" [disabled]="enCours()" (click)="vider()">Oui, vider</button>
+          <button type="button" class="btn btn-clair" (click)="confirmerVidage.set(false)">Non, garder</button>
+        } @else {
+          <button type="button" class="btn btn-clair" [disabled]="enCours()" (click)="confirmerVidage.set(true)">Vider le panier</button>
+        }
       </div>
     }
   </section>

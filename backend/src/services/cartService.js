@@ -260,4 +260,70 @@ async function ajouterLigne(clientId, { type, produitId, menuId, choix = {}, qua
   return vuePanier(panier);
 }
 
-module.exports = { QUANTITE_MAX, lirePanier, ajouterLigne };
+// Prix actuel d'une ligne, ou null si elle n'est plus commandable.
+async function prixCourant(ligne) {
+  if (ligne.type === "produit") {
+    const p = await repo.produitParId(ligne.produit);
+    return p && p.disponible !== false ? p.prixMillimes : null;
+  }
+  try {
+    return await preparerMenu(ligne.menu, tableauVersChoix(ligne.choix));
+  } catch (err) {
+    if (err instanceof ErreurMetier) return null;
+    throw err;
+  }
+}
+
+// PATCH /api/panier/lignes/:id : { quantite?, choix? }. quantite 0 = supprimer la ligne.
+async function modifierLigne(clientId, ligneId, { quantite, choix }) {
+  if (!mongoose.isValidObjectId(ligneId)) throw new ErreurMetier(404, "Ligne introuvable");
+  const panier = await repo.trouverOuCreer(clientId);
+  // Cherche uniquement dans le panier du client connecté : on ne peut pas toucher à celui d'un autre.
+  const ligne = panier.lignes.id(ligneId);
+  if (!ligne) throw new ErreurMetier(404, "Ligne introuvable");
+
+  if (quantite === 0) {
+    panier.lignes.pull(ligne._id);
+  } else {
+    if (choix !== undefined) {
+      if (ligne.type !== "menu") {
+        throw new ErreurMetier(400, "Seul un menu composé a des choix à modifier");
+      }
+      // Mêmes règles min/max qu'à l'ajout.
+      ligne.prixUnitaireMillimes = await preparerMenu(ligne.menu, choix);
+      ligne.choix = choixVersTableau(choix);
+        } else {
+      // Le client a vu la ligne : on enregistre le prix actuel (efface l'alerte « prix modifié »).
+      const prix = await prixCourant(ligne);
+      // Article indisponible : on ne change plus sa quantité, on peut seulement le supprimer.
+      if (prix === null && quantite !== undefined) {
+        throw new ErreurMetier(409, "Cet article est indisponible : vous pouvez seulement le supprimer");
+      }
+      if (prix !== null) ligne.prixUnitaireMillimes = prix;
+    }
+    if (quantite !== undefined) ligne.quantite = quantite;
+  }
+
+  await panier.save();
+  return vuePanier(panier);
+}
+
+// DELETE /api/panier/lignes/:id
+async function supprimerLigne(clientId, ligneId) {
+  if (!mongoose.isValidObjectId(ligneId)) throw new ErreurMetier(404, "Ligne introuvable");
+  const panier = await repo.trouverOuCreer(clientId);
+  if (!panier.lignes.id(ligneId)) throw new ErreurMetier(404, "Ligne introuvable");
+  panier.lignes.pull(ligneId);
+  await panier.save();
+  return vuePanier(panier);
+}
+
+// DELETE /api/panier
+async function viderPanier(clientId) {
+  const panier = await repo.trouverOuCreer(clientId);
+  panier.lignes = [];
+  await panier.save();
+  return vuePanier(panier);
+}
+
+module.exports = { QUANTITE_MAX, lirePanier, ajouterLigne, modifierLigne, supprimerLigne, viderPanier };
