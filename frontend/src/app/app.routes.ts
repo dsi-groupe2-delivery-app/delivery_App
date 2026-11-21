@@ -6,6 +6,7 @@ import { MonEspace } from './pages/mon-espace/mon-espace';
 import { Carte } from './pages/carte/carte';
 import { MenusComposes } from './pages/menus-composes/menus-composes';
 import { MenuComposeDetail } from './pages/menu-compose-detail/menu-compose-detail';
+import { PanierPage } from './pages/panier/panier';
 // Chaque story ajoute ses routes ici. Exemple pour une page réservée au livreur (US05) :
 //   { path: 'livreur', component: ..., canActivate: [authGuard, roleGuard('livreur')] }
 export const routes: Routes = [
@@ -22,5 +23,7 @@ export const routes: Routes = [
     { path: 'carte', component: Carte, title: 'Carte' },
     { path: 'menus-composes', component: MenusComposes, title: 'Menus composés' },
     { path: 'menus-composes/:id', component: MenuComposeDetail, title: 'Menu composé' },
+      // US11 : panier réservé au client connecté.
+  { path: 'panier', component: PanierPage, canActivate: [authGuard, roleGuard('client')], title: 'Mon panier' },
   { path: '**', redirectTo: '' },
 ];

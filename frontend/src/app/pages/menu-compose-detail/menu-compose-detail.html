@@ -27,9 +27,16 @@
         </div>
       </div>
   
+      @if (message()) {
+        <div class="alert alert-success" role="status">{{ message() }} <a routerLink="/panier">Voir le panier</a></div>
+      }
+  
       <app-menu-choix
         [menu]="m"
-        [commandable]="false"
+        [commandable]="m.disponible && peutCommander()"
+        [enCours]="enCours()"
+        [erreur]="erreurAjout()"
+        (valider)="ajouter($event)"
       />
     }
   </section>

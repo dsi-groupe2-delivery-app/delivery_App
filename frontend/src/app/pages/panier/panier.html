@@ -1,0 +1,43 @@
+<section class="panier">
+    <h1>Mon panier</h1>
+  
+    @if (chargement()) {
+      <p class="etat">Chargement du panier…</p>
+    } @else if (!cart.panier() || cart.panier()!.lignes.length === 0) {
+      <div class="vide">
+        <p>Votre panier est vide.</p>
+        <p>Parcourez <a routerLink="/carte">la carte</a> ou <a routerLink="/menus-composes">les menus composés</a> pour composer votre commande.</p>
+      </div>
+    } @else {
+      @let panier = cart.panier()!;
+  
+      <ul class="lignes">
+        @for (l of panier.lignes; track l._id) {
+          <li class="ligne" [class.indisponible]="!l.disponible">
+            <img [src]="catalogue.imageUrl(l.image)" [alt]="l.nom" loading="lazy" />
+  
+            <div class="infos">
+              <h2>{{ l.nom }}</h2>
+              @for (g of l.choix; track g.groupeId) {
+                <p class="choix"><strong>{{ g.libelle }} :</strong> {{ nomsOptions(g) }}</p>
+              }
+              @for (a of l.alertes; track a.message) {
+                <p class="alerte" [class.prix]="a.type === 'prix_modifie'" role="alert">{{ a.message }}</p>
+              }
+              <p class="unitaire">{{ l.prixUnitaire | tnd }} l'unité</p>
+            </div>
+  
+            <div class="droite">
+              <p class="unitaire">Quantité : {{ l.quantite }}</p>
+              <p class="total-ligne">{{ l.totalLigne | tnd }}</p>
+            </div>
+          </li>
+        }
+      </ul>
+  
+      <div class="resume">
+        <p class="total">Total <strong>{{ panier.total | tnd }}</strong></p>
+      </div>
+    }
+  </section>
+  

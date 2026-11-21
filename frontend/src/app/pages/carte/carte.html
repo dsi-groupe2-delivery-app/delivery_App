@@ -1,6 +1,13 @@
 <section class="catalogue">
     <h1>Notre carte</h1>
-    <p class="subtitle">Parcourez nos catégories et découvrez tous nos produits.</p>
+    <p class="subtitle">Parcourez nos catégories et ajoutez vos plats préférés au panier.</p>
+  
+    @if (message()) {
+      <div class="alert alert-success" role="status">{{ message() }} <a routerLink="/panier">Voir le panier</a></div>
+    }
+    @if (erreurAjout()) {
+      <div class="alert alert-error" role="alert">{{ erreurAjout() }}</div>
+    }
   
     @if (chargement()) {
       <p class="etat">Chargement de la carte…</p>
@@ -34,6 +41,13 @@
                 <p class="prix">{{ p.prix | tnd }}</p>
                 @if (!p.disponible) {
                   <span class="badge">Indisponible</span>
+                } @else if (peutCommander()) {
+                  <div class="ajout">
+                    <input #q type="number" min="1" max="20" step="1" value="1" [attr.aria-label]="'Quantité de ' + p.nom" />
+                    <button type="button" class="btn" [disabled]="enCours() === p._id" (click)="ajouter(p, q.valueAsNumber)">
+                      Ajouter
+                    </button>
+                  </div>
                 }
               </div>
             </article>
