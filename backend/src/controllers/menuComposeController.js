@@ -17,6 +17,14 @@ const EMPTY_VALUES = () => ({
 function removeFile(file) {
   if (file && file.path) fs.unlink(file.path, () => {});
 }
+function removeImageByUrl(url) {
+  if (!url || !String(url).startsWith('/uploads/menus/')) return;
+  const fichier = path.join(__dirname, '..', 'public', 'uploads', 'menus', path.basename(url));
+  fs.unlink(fichier, () => {});
+}
+function notFound(res) {
+  res.status(404).send('Menu introuvable');
+}
 function setFlash(req, type, message) {
   if (req.session) req.session.flash = { type, message };
 }

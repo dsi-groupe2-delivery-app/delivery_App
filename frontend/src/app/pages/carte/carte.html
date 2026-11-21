@@ -1,0 +1,45 @@
+<section class="catalogue">
+    <h1>Notre carte</h1>
+    <p class="subtitle">Parcourez nos catégories et découvrez tous nos produits.</p>
+  
+    @if (chargement()) {
+      <p class="etat">Chargement de la carte…</p>
+    } @else if (erreur()) {
+      <div class="alert alert-error" role="alert">
+        {{ erreur() }} <button type="button" class="lien" (click)="charger()">Réessayer</button>
+      </div>
+    } @else if (categories().length === 0) {
+      <p class="etat">La carte est vide pour le moment, revenez bientôt.</p>
+    } @else {
+      <div class="filtres" role="group" aria-label="Filtrer par catégorie">
+        <button type="button" class="chip" [class.actif]="filtre() === null" (click)="filtre.set(null)">Tout</button>
+        @for (c of categories(); track c._id) {
+          <button type="button" class="chip" [class.actif]="filtre() === c._id" (click)="filtre.set(c._id)">
+            {{ c.nom }}
+          </button>
+        }
+      </div>
+  
+      @for (s of sections(); track s.categorie._id) {
+        <h2 class="categorie">{{ s.categorie.nom }}</h2>
+        <div class="grille">
+          @for (p of s.produits; track p._id) {
+            <article class="carte-produit" [class.indisponible]="!p.disponible">
+              <img [src]="catalogue.imageUrl(p.image)" [alt]="p.nom" loading="lazy" />
+              <div class="corps">
+                <h3>{{ p.nom }}</h3>
+                @if (p.description) {
+                  <p class="description">{{ p.description }}</p>
+                }
+                <p class="prix">{{ p.prix | tnd }}</p>
+                @if (!p.disponible) {
+                  <span class="badge">Indisponible</span>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      }
+    }
+  </section>
+  

@@ -6,7 +6,7 @@ const { sessionMiddleware, cookieOptions, COOKIE_NAME } = require("./config/sess
 const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
 const { UPLOADS_DIR } = require("./config/upload");
-
+const catalogueApiRoutes = require("./routes/catalogueApi");
 const app = express();
 
 // Azure App Service est derrière un proxy HTTPS : nécessaire pour le cookie "secure".
@@ -30,7 +30,8 @@ const methodOverride = require('method-override');
 app.use(methodOverride('_method'));
 app.use(express.urlencoded({ extended: false })); // formulaires HTML du Back-Office
 app.use(sessionMiddleware());
-
+// Images des menus composés (US08) : rangées dans src/public/uploads/menus.
+app.use("/uploads/menus", express.static(path.join(__dirname, "public", "uploads", "menus")));
 // Fichiers publics : images des produits (US06) et image par défaut.
 app.use("/uploads", express.static(UPLOADS_DIR));
 app.use("/static", express.static(path.join(__dirname, "public")));
@@ -68,4 +69,6 @@ app.use((err, req, res, next) => {
 });
 // travaille de lina 
 app.use('/admin/menus-composes', require('./routes/menuComposeRoutes'));
+// Carte publique (US10)
+app.use("/api", catalogueApiRoutes);
 module.exports = app;
