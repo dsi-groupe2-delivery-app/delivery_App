@@ -1,0 +1,64 @@
+@for (g of menu().groupes; track g._id) {
+    <fieldset class="groupe">
+      <legend>{{ g.libelle }}</legend>
+      <p class="regle">{{ regle(g) }}</p>
+      <div class="options">
+        @for (o of g.options; track $index) {
+          <button
+            type="button"
+            class="option"
+            [class.choisie]="estChoisie(g, o.produit._id)"
+            [attr.aria-pressed]="estChoisie(g, o.produit._id)"
+            [disabled]="!o.produit.disponible || !commandable()"
+            (click)="basculer(g, o.produit._id)"
+          >
+            <span>{{ o.produit.nom }}</span>
+            @if (!o.produit.disponible) {
+              <span class="badge">Indisponible</span>
+            } @else if (o.supplement > 0) {
+              <span class="supplement">{{ o.supplement | tnd: true }}</span>
+            }
+          </button>
+        }
+      </div>
+    </fieldset>
+  }
+  
+  @if (commandable()) {
+    @if (problemes().length > 0) {
+      <ul class="problemes">
+        @for (p of problemes(); track p) {
+          <li>{{ p }}</li>
+        }
+      </ul>
+    }
+    @if (erreur()) {
+      <p class="alert-error" role="alert">{{ erreur() }}</p>
+    }
+    <div class="actions">
+      @if (avecQuantite()) {
+        <label class="quantite">
+          Quantité
+          <input
+            #q
+            type="number"
+            min="1"
+            max="20"
+            step="1"
+            [value]="quantite()"
+            (input)="quantite.set(q.valueAsNumber)"
+          />
+        </label>
+      }
+      <button type="button" class="btn" [disabled]="problemes().length > 0 || !quantiteValide() || enCours()" (click)="envoyer()">
+        {{ libelleBouton() }}
+      </button>
+      @if (avecAnnuler()) {
+        <button type="button" class="btn btn-clair" (click)="annuler.emit()">Annuler</button>
+      }
+    </div>
+    @if (avecQuantite() && !quantiteValide()) {
+      <p class="problemes">La quantité doit être un entier de 1 à 20.</p>
+    }
+  }
+  

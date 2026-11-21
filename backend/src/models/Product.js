@@ -18,5 +18,6 @@ const productSchema = new mongoose.Schema(
 // Index du tri .sort({ nom: 1 }) : obligatoire sur Cosmos DB (production).
 // Règle de l'équipe : chaque nouveau .sort() doit avoir son index dans le modèle.
 productSchema.index({ nom: 1 });
-
+// US10 : produits d'une catégorie triés par nom (.sort({ categorie: 1, nom: 1 })).
+productSchema.index({ categorie: 1, nom: 1 });
 module.exports = mongoose.model("Product", productSchema);

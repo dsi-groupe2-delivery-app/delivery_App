@@ -1,0 +1,36 @@
+<section class="catalogue">
+    <p><a routerLink="/menus-composes" class="lien">← Tous les menus</a></p>
+  
+    @if (chargement()) {
+      <p class="etat">Chargement du menu…</p>
+    } @else if (introuvable()) {
+      <p class="etat">Ce menu n'existe pas. <a routerLink="/menus-composes" class="lien">Voir les menus</a></p>
+    } @else if (erreur()) {
+      <div class="alert alert-error" role="alert">
+        {{ erreur() }} <button type="button" class="lien" (click)="charger()">Réessayer</button>
+      </div>
+    } @else if (menu(); as m) {
+      <div class="detail-menu">
+        <img [src]="catalogue.imageUrl(m.image)" [alt]="m.nom" />
+        <div>
+          <h1>{{ m.nom }}</h1>
+          @if (m.description) {
+            <p class="description">{{ m.description }}</p>
+          }
+          <p class="prix">À partir de {{ m.prixBase | tnd }}</p>
+          @if (!m.disponible) {
+            <span class="badge">Indisponible</span>
+            @if (m.raison) {
+              <p class="description">{{ m.raison }}</p>
+            }
+          }
+        </div>
+      </div>
+  
+      <app-menu-choix
+        [menu]="m"
+        [commandable]="false"
+      />
+    }
+  </section>
+  

@@ -1,0 +1,33 @@
+<section class="catalogue">
+    <h1>Nos menus composés</h1>
+    <p class="subtitle">Composez votre menu : choisissez vos options dans chaque groupe.</p>
+  
+    @if (chargement()) {
+      <p class="etat">Chargement des menus…</p>
+    } @else if (erreur()) {
+      <div class="alert alert-error" role="alert">
+        {{ erreur() }} <button type="button" class="lien" (click)="charger()">Réessayer</button>
+      </div>
+    } @else if (menus().length === 0) {
+      <p class="etat">Aucun menu composé pour le moment.</p>
+    } @else {
+      <div class="grille">
+        @for (m of menus(); track m._id) {
+          <a class="carte-produit" [class.indisponible]="!m.disponible" [routerLink]="['/menus-composes', m._id]">
+            <img [src]="catalogue.imageUrl(m.image)" [alt]="m.nom" loading="lazy" />
+            <div class="corps">
+              <h3>{{ m.nom }}</h3>
+              @if (m.description) {
+                <p class="description">{{ m.description }}</p>
+              }
+              <p class="prix">À partir de {{ m.prixBase | tnd }}</p>
+              @if (!m.disponible) {
+                <span class="badge">Indisponible</span>
+              }
+            </div>
+          </a>
+        }
+      </div>
+    }
+  </section>
+  
