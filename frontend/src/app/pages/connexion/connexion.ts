@@ -47,16 +47,35 @@ export class Connexion {
     this.sending.set(true);
     try {
       const { email, password } = this.form.getRawValue();
-      const redirect = await this.auth.login(email, password);
+  
+const redirect = await this.auth.login(email, password);
 
-      if (redirect.startsWith('/admin')) {
-        // Le Back-Office (EJS) est servi par l'API, pas par Angular.
-        window.location.href = environment.apiUrl + redirect;
-        return;
-      }
-      const retour = this.route.snapshot.queryParamMap.get('retour');
-      await this.router.navigateByUrl(retour && retour.startsWith('/') ? retour : redirect);
-    } catch (err) {
+const user = this.auth.user();
+
+// Première connexion du livreur
+if (
+  user?.role === 'livreur' &&
+  user.doitChangerMotDePasse
+) {
+  await this.router.navigateByUrl('/changer-mot-de-passe');
+  return;
+}
+
+// Back-Office admin
+if (redirect.startsWith('/admin')) {
+  window.location.href = environment.apiUrl + redirect;
+  return;
+}
+
+// Connexion normale
+const retour = this.route.snapshot.queryParamMap.get('retour');
+
+await this.router.navigateByUrl(
+  retour && retour.startsWith('/')
+    ? retour
+    : redirect
+);
+} catch (err) {
       const e = err as HttpErrorResponse;
       this.errorMessage.set(
         e.status === 0

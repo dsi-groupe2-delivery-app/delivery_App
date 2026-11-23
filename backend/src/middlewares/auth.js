@@ -50,4 +50,23 @@ function requireRole(...roles) {
   };
 }
 
-module.exports = { requireAuth, requireRole };
+function requirePasswordChanged(req, res, next) {
+  if (
+    req.user.role === "livreur" &&
+    req.user.doitChangerMotDePasse
+  ) {
+    if (isApi(req)) {
+      return res.status(403).json({
+        message: "Vous devez changer votre mot de passe avant de continuer.",
+        mustChangePassword: true
+      });
+    }
+
+    return res.redirect("/changer-mot-de-passe");
+  }
+
+  next();
+}
+
+
+module.exports = { requireAuth, requireRole ,requirePasswordChanged};

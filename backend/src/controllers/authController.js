@@ -95,4 +95,45 @@ function me(req, res) {
   return res.json({ user: req.user.toJSON() });
 }
 
-module.exports = { register, login, logout, me, HOME_BY_ROLE };
+
+async function changePassword(req, res, next) {
+  try {
+    const { newPassword } = req.body;
+
+    const user = await User.findById(req.user._id)
+      .select("+passwordHash");
+
+    // Éviter de réutiliser le mot de passe temporaire
+    const samePassword = await bcrypt.compare(
+      newPassword,
+      user.passwordHash
+    );
+
+    if (samePassword) {
+      return res.status(400).json({
+        message: "Choisissez un mot de passe différent du mot de passe temporaire."
+      });
+    }
+
+    // Hash du nouveau mot de passe
+    user.passwordHash = await bcrypt.hash(
+      newPassword,
+      BCRYPT_ROUNDS
+    );
+
+    user.doitChangerMotDePasse = false;
+
+    await user.save();
+
+    return res.json({
+      message: "Mot de passe modifié avec succès.",
+      user: user.toJSON()
+    });
+
+  } catch (err) {
+    return next(err);
+  }
+}
+
+
+module.exports = { register, login, logout, me,changePassword, HOME_BY_ROLE };

@@ -1,5 +1,4 @@
 require("dotenv").config(); // charge backend/.env en local (ignoré sur Azure)
-
 const mongoose = require("mongoose");
 const app = require("./app");
 
