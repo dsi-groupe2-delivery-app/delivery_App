@@ -78,15 +78,6 @@ app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ message: "Erreur interne du serveur" });
 });
-console.log("EMAIL_USER existe :", !!process.env.EMAIL_USER);
-console.log("EMAIL_PASS existe :", !!process.env.EMAIL_PASS);
-const transporter = require("./config/email");
 
-transporter.verify((error, success) => {
-    if (error) {
-        console.log("Erreur email :", error);
-    } else {
-        console.log("Serveur Gmail prêt !");
-    }
-});
+
 module.exports = app;

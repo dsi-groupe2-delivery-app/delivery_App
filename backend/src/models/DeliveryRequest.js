@@ -36,7 +36,7 @@ const deliveryRequestSchema = new mongoose.Schema(
     },
   }
 );
-
+deliveryRequestSchema.index({ dateDemande: -1 });
 module.exports =
   mongoose.models.DeliveryRequest ||
   mongoose.model("DeliveryRequest", deliveryRequestSchema);
