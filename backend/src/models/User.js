@@ -21,6 +21,11 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ROLES, required: true, default: "client" },
     // Un compte inactif ne peut pas se connecter (US02).
     actif: { type: Boolean, default: true },
+    //aprés premier connexion livreur doit changer son mdp mais pas client
+    doitChangerMotDePasse: {
+  type: Boolean,
+  default: false
+},
   },
   { timestamps: true }
 );

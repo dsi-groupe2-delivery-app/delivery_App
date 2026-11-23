@@ -55,6 +55,19 @@ router.get("/", (req, res) => {
   res.render("admin", { agent: req.user });
 });
 
+// Gestion des demandes des livreurs
+const deliveryRequest = require("../controllers/deliveryRequestController");
+router.get("/livreurs", deliveryRequest.getAllRequests);
+// Accepter une demande de livreur
+router.post(
+  "/livreurs/:id/accept",
+  deliveryRequest.acceptRequest
+);
+// Refuser une demande de livreur
+router.post(
+  "/livreurs/:id/reject",
+  deliveryRequest.rejectRequest
+);
 // US06 : catégories et produits de la carte
 router.get("/categories", catalogue.listeCategories);
 router.post("/categories", catalogue.creerCategorie);

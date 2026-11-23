@@ -9,6 +9,7 @@ const { UPLOADS_DIR } = require("./config/upload");
 const catalogueApiRoutes = require("./routes/catalogueApi");
 const cartRoutes = require("./routes/cart");
 const app = express();
+const deliveryRequestRoutes = require("./routes/deliveryRequest");
 
 // Azure App Service est derrière un proxy HTTPS : nécessaire pour le cookie "secure".
 app.set("trust proxy", 1);
@@ -58,20 +59,25 @@ app.get("/js/menu-compose-form.js", (req, res) => {
 });
 // Authentification (US01, US02)
 app.use("/api/auth", authRoutes);
+// Demande d'inscription livreur
+app.use("/api/delivery-requests", deliveryRequestRoutes);
 
 // Back-Office de l'agent (US03, US06)
 app.use("/admin", adminRoutes);
 
-// Erreurs non gérées : réponse générique, sans détail technique pour le client.
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ message: "Erreur interne du serveur" });
-});
+
 // travaille de lina 
 app.use('/admin/menus-composes', require('./routes/menuComposeRoutes'));
 // Carte publique (US10)
 app.use("/api", catalogueApiRoutes);
 // Panier du client (US11)
 app.use("/api/panier", cartRoutes);
+// Erreurs non gérées : réponse générique, sans détail technique pour le client.
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ message: "Erreur interne du serveur" });
+});
+
+
 module.exports = app;

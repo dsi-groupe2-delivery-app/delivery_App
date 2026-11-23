@@ -34,7 +34,19 @@ export class AuthService {
       this.http.post<{ message: string; user: User }>(`${API}/register`, payload)
     );
   }
-
+submitDeliveryRequest(payload: {
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone: string;
+}) {
+  return firstValueFrom(
+    this.http.post<{ message: string }>(
+      `${environment.apiUrl}/api/delivery-requests/submit`,
+      payload
+    )
+  );
+}
   /** Renvoie la page d'arrivée choisie par le serveur selon le rôle du compte. */
   async login(email: string, password: string): Promise<string> {
     const res = await firstValueFrom(
@@ -51,4 +63,22 @@ export class AuthService {
       this._user.set(null);
     }
   }
+async changePassword(
+  newPassword: string,
+  confirmPassword: string
+) {
+  const res = await firstValueFrom(
+    this.http.post<{ message: string; user: User }>(
+      `${API}/change-password`,
+      {
+        newPassword,
+        confirmPassword
+      }
+    )
+  );
+
+  this._user.set(res.user);
+
+  return res;
+}
 }

@@ -1,0 +1,120 @@
+
+<section class="auth-split">
+
+  <app-brand-panel />
+
+  <div class="auth-form">
+
+    <h1>Bienvenue dans notre équipe !</h1>
+
+    <p class="subtitle">
+      Pour sécuriser votre compte, veuillez choisir
+      un nouveau mot de passe.
+    </p>
+
+    @if (errorMessage()) {
+      <p class="alert alert-error" role="alert">
+        {{ errorMessage() }}
+      </p>
+    }
+
+    @if (successMessage()) {
+      <p class="alert alert-success" role="status">
+        {{ successMessage() }}
+      </p>
+    }
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      novalidate
+    >
+
+      <!-- Nouveau mot de passe -->
+      <div class="field">
+
+        <label class="input-icon"
+          [class.invalid]="error('newPassword')">
+
+          <app-icon name="lock" />
+
+          <input
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="newPassword"
+            placeholder="Nouveau mot de passe"
+            autocomplete="new-password"
+          />
+
+          <button
+            type="button"
+            class="eye"
+            (click)="showPassword.set(!showPassword())"
+          >
+            <app-icon
+              [name]="showPassword() ? 'eye-off' : 'eye'"
+            />
+          </button>
+
+        </label>
+
+        @if (error('newPassword')) {
+          <p class="field-error">
+            {{ error('newPassword') }}
+          </p>
+        }
+
+      </div>
+
+      <!-- Confirmation -->
+      <div class="field">
+
+        <label class="input-icon"
+          [class.invalid]="error('confirmPassword')">
+
+          <app-icon name="lock" />
+
+          <input
+            [type]="showConfirmation() ? 'text' : 'password'"
+            formControlName="confirmPassword"
+            placeholder="Confirmer le mot de passe"
+            autocomplete="new-password"
+          />
+
+          <button
+            type="button"
+            class="eye"
+            (click)="showConfirmation.set(!showConfirmation())"
+          >
+            <app-icon
+              [name]="showConfirmation() ? 'eye-off' : 'eye'"
+            />
+          </button>
+
+        </label>
+
+        @if (error('confirmPassword')) {
+          <p class="field-error">
+            {{ error('confirmPassword') }}
+          </p>
+        }
+
+      </div>
+
+      <p class="subtitle">
+        Votre mot de passe doit contenir au moins
+        8 caractères.
+      </p>
+
+      <button
+        type="submit"
+        class="btn-primary"
+        [disabled]="sending()"
+      >
+        {{ sending() ? 'Modification...' : 'Changer mon mot de passe' }}
+      </button>
+
+    </form>
+
+  </div>
+
+</section>

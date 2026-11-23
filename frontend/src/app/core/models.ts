@@ -8,6 +8,8 @@ export interface User {
   telephone: string;
   role: Role;
   actif: boolean;
+  //ajouter pour changement de mpd de livreur 
+  doitChangerMotDePasse: boolean;
 }
 
 export interface RegisterPayload {
