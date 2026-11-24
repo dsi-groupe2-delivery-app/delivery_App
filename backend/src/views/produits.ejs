@@ -1,0 +1,78 @@
+<%- include("partials/haut", { titre: "Produits" }) %>
+<link rel="stylesheet" href="/static/produits.css">
+
+<div class="page-produits">
+  <div class="pp-entete">
+    <div class="pp-titre-bloc">
+      <span class="pp-icone" aria-hidden="true">&#x1F354;</span>
+      <div>
+        <h1>Produits</h1>
+        <p class="pp-sous-titre">Gérez les produits de la carte : prix, catégorie, image et disponibilité.</p>
+      </div>
+    </div>
+    <a href="/admin/produits/new" class="pp-bouton">+ Nouveau produit</a>
+  </div>
+
+  <% if (message) { %>
+    <p class="pp-message" role="status"><%= message %></p>
+  <% } %>
+
+  <div class="pp-carte">
+    <!-- Filtre par catégorie : recharge la page avec ?categorie=<id> -->
+    <form method="GET" action="/admin/produits" class="pp-filtre">
+      <label for="categorie">Filtrer par catégorie :</label>
+      <select id="categorie" name="categorie" onchange="this.form.submit()">
+        <option value="">Toutes</option>
+        <% categories.forEach((categorie) => { %>
+          <option value="<%= categorie._id %>" <%= String(categorie._id) === filtre ? "selected" : "" %>>
+            <%= categorie.nom %>
+          </option>
+        <% }) %>
+      </select>
+      <noscript><button type="submit" class="pp-bouton pp-secondaire">Filtrer</button></noscript>
+      <span class="pp-compteur"><%= produits.length %> produit<%= produits.length > 1 ? "s" : "" %></span>
+    </form>
+
+    <% if (produits.length === 0) { %>
+      <p class="pp-vide">Aucun produit dans cette catégorie.</p>
+    <% } else { %>
+      <div class="pp-tableau-conteneur">
+        <table class="pp-tableau">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Nom</th>
+              <th>Catégorie</th>
+              <th>Prix</th>
+              <th>Statut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% produits.forEach((produit) => { %>
+              <tr>
+                <td>
+                  <img class="pp-vignette" alt=""
+                       src="<%= produit.image ? '/uploads/' + produit.image : '/static/produit-defaut.svg' %>">
+                </td>
+                <td class="pp-nom"><%= produit.nom %></td>
+                <td><span class="pp-categorie"><%= produit.nomCategorie %></span></td>
+                <td class="pp-prix"><%= millimesVersTnd(produit.prixMillimes) %> TND</td>
+                <td>
+                  <span class="pp-statut <%= produit.disponible ? 'pp-dispo' : 'pp-indispo' %>">
+                    <%= produit.disponible ? "Disponible" : "Indisponible" %>
+                  </span>
+                </td>
+                <td>
+                  <a href="/admin/produits/<%= produit._id %>/edit" class="pp-bouton pp-petit pp-secondaire">Modifier</a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include("partials/bas") %>

@@ -1,0 +1,162 @@
+/* US07 : style des pages Produits du Back-Office.
+   Toutes les règles sont limitées à .page-produits : les autres pages ne changent pas. */
+   
+.page-produits {
+  --rouge: #c92a2a;
+  --rouge-fonce: #a51d1d;
+  --rouge-clair: #fff0f0;
+  --vert: #1e7b46;
+  --vert-clair: #e7f6ec;
+  --gris: #6b7280;
+  --bordure: #ececec;
+  --ombre: 0 1px 4px rgba(0, 0, 0, 0.06);
+  --ombre-rouge: 0 2px 6px rgba(201, 42, 42, 0.25);
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* ---------- Mises en page communes ---------- */
+.page-produits .pp-entete,
+.page-produits .pp-titre-bloc,
+.page-produits .pp-filtre {
+  display: flex;
+  align-items: center;
+}
+
+/* Blocs blancs : en-tête et carte */
+.page-produits .pp-entete,
+.page-produits .pp-carte {
+  background: #fff;
+  border: 1px solid var(--bordure);
+  border-radius: 12px;
+  box-shadow: var(--ombre);
+}
+
+/* ---------- En-tête de page ---------- */
+.page-produits .pp-entete {
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 20px 24px;
+  border-left: 5px solid var(--rouge);
+}
+.page-produits .pp-titre-bloc { gap: 14px; }
+.page-produits .pp-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--rouge-clair);
+  font-size: 24px;
+}
+.page-produits h1 { margin: 0; font-size: 24px; color: var(--rouge-fonce); }
+.page-produits .pp-sous-titre { margin: 2px 0 0; color: var(--gris); font-size: 14px; }
+
+/* ---------- Boutons ---------- */
+.page-produits .pp-bouton {
+  display: inline-block;
+  padding: 10px 18px;
+  border: 1px solid var(--rouge);
+  border-radius: 8px;
+  background: var(--rouge);
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: var(--ombre-rouge);
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.page-produits .pp-bouton:hover {
+  background: var(--rouge-fonce);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(201, 42, 42, 0.3);
+}
+.page-produits .pp-secondaire { background: #fff; color: var(--rouge); box-shadow: none; }
+.page-produits .pp-secondaire:hover { background: var(--rouge-clair); color: var(--rouge-fonce); }
+.page-produits .pp-petit { padding: 6px 14px; font-size: 13px; }
+
+/* ---------- Message de confirmation ---------- */
+.page-produits .pp-message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  border-left: 4px solid var(--vert);
+  background: var(--vert-clair);
+  color: var(--vert);
+  font-weight: bold;
+}
+
+/* ---------- Carte : filtre et tableau ---------- */
+.page-produits .pp-carte { overflow: hidden; }
+
+.page-produits .pp-filtre {
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--bordure);
+}
+.page-produits .pp-filtre label { margin: 0; font-weight: bold; white-space: nowrap; }
+.page-produits .pp-filtre select {
+  width: auto;
+  min-width: 200px;
+  padding: 8px 10px;
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+.page-produits .pp-filtre select:focus {
+  outline: none;
+  border-color: var(--rouge);
+  box-shadow: 0 0 0 3px rgba(201, 42, 42, 0.15);
+}
+.page-produits .pp-compteur { margin-left: auto; color: var(--gris); font-size: 13px; }
+
+/* ---------- Tableau ---------- */
+.page-produits .pp-tableau-conteneur { overflow-x: auto; } /* écran étroit : défilement horizontal */
+.page-produits .pp-tableau { width: 100%; border-collapse: collapse; }
+
+.page-produits .pp-tableau th,
+.page-produits .pp-tableau td { padding: 12px 16px; }
+
+.page-produits .pp-tableau th {
+  background: var(--rouge-clair);
+  color: var(--rouge-fonce);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+  border-bottom: 2px solid #f3caca;
+}
+.page-produits .pp-tableau td { border-bottom: 1px solid var(--bordure); vertical-align: middle; }
+.page-produits .pp-tableau tbody tr { transition: background 0.12s; }
+.page-produits .pp-tableau tbody tr:hover { background: #fff7f7; }
+.page-produits .pp-tableau tbody tr:last-child td { border-bottom: 0; }
+
+.page-produits .pp-vignette {
+  display: block;
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--bordure);
+}
+.page-produits .pp-nom { font-weight: bold; color: #222; }
+.page-produits .pp-prix { white-space: nowrap; font-weight: bold; }
+
+/* ---------- Pastilles : catégorie et statut ---------- */
+.page-produits .pp-categorie,
+.page-produits .pp-statut {
+  display: inline-block;
+  border-radius: 999px;
+  font-size: 12px;
+}
+.page-produits .pp-categorie { padding: 3px 10px; background: #f4f4f5; color: #444; }
+.page-produits .pp-statut { padding: 4px 10px; font-weight: bold; white-space: nowrap; }
+.page-produits .pp-dispo { background: var(--vert-clair); color: var(--vert); }
+.page-produits .pp-indispo { background: var(--rouge-clair); color: var(--rouge); }
+
+.page-produits .pp-vide { margin: 0; padding: 24px 18px; color: var(--gris); text-align: center; }

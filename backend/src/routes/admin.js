@@ -60,7 +60,10 @@ router.get("/categories", catalogue.listeCategories);
 router.post("/categories", catalogue.creerCategorie);
 router.get("/produits/new", catalogue.nouveauProduit);
 router.post("/produits", catalogue.creerProduit);
-
+// US07 : liste et modification des produits
+router.get("/produits", catalogue.listeProduits);
+router.get("/produits/:id/edit", catalogue.afficherFormulaireModification);
+router.put("/produits/:id", catalogue.enregistrerModificationProduit);
 // POST /admin/logout : déconnexion puis retour à la page de connexion
 router.post("/logout", (req, res, next) => {
   const cookieName = req.app.get("sessionCookieName");
@@ -70,5 +73,6 @@ router.post("/logout", (req, res, next) => {
     return res.redirect("/admin/connexion");
   });
 });
+
 
 module.exports = router;
