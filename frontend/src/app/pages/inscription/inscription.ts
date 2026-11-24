@@ -26,10 +26,13 @@ export class Inscription {
       prenom: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       telephone: ['', Validators.required],
-      password: ['', [Validators.required, strongPassword]],
-      passwordConfirm: ['', Validators.required],
-    },
-    { validators: passwordsMatch }
+      // travaille de sihem 
+      // password: ['', [Validators.required, strongPassword]],
+      // passwordConfirm: ['', Validators.required],
+      //  je vais annuler required pour que le livreur peux envoyer demande d'inscrit (on vas les activer plus tard)
+         password: [''],
+   passwordConfirm: [''],
+    }
   );
 
   readonly showPassword = signal(false);
@@ -38,6 +41,7 @@ export class Inscription {
   /** Erreurs renvoyées par le serveur, affichées sous chaque champ. */
   readonly serverErrors = signal<FieldErrors>({});
   readonly globalError = signal('');
+readonly successMessage = signal('');
 
   /** Message à afficher sous un champ : erreur serveur, sinon erreur locale. */
   error(field: string): string {
@@ -62,19 +66,83 @@ export class Inscription {
       this.serverErrors.set(rest);
     }
   }
+//cette methode pour activer les champs seloon le role
+  onRoleChange(role: 'client' | 'livreur') {
+  const password = this.form.controls.password;
+  const passwordConfirm = this.form.controls.passwordConfirm;
+
+  if (role === 'client') {
+    // Le client doit choisir un mdp
+    password.setValidators([Validators.required, strongPassword]);
+    passwordConfirm.setValidators([Validators.required]);
+
+    // Vérifier que les deux mots de passe correspondent.
+    this.form.setValidators(passwordsMatch);
+  } else {
+    // Le livreur n'a pas besoin de mot de passe pour envoyer sa demande
+    password.clearValidators();
+    passwordConfirm.clearValidators();
+
+    // La comparaison des mots de passe n'est plus nécessaire.
+    this.form.clearValidators();
+
+    password.setValue('');
+    passwordConfirm.setValue('');
+  }
+
+  password.updateValueAndValidity();
+  passwordConfirm.updateValueAndValidity();
+  this.form.updateValueAndValidity();
+}
 
   async submit() {
     this.submitted.set(true);
     this.globalError.set('');
+    this.successMessage.set('');
+    const role = this.form.controls.role.value;
+
+if (role === 'client' || role === 'livreur') {
+  this.onRoleChange(role);
+}
+
     if (this.form.invalid) return;
 
     this.sending.set(true);
+   // ce code creer directement un compte (client)
+    // try {
+    //   await this.auth.register(this.form.getRawValue() as RegisterPayload);
+    //   await this.router.navigate(['/connexion'], {
+    //     state: { message: 'Compte créé. Vous pouvez maintenant vous connecter.' },
+    //   });
+    // } 
     try {
-      await this.auth.register(this.form.getRawValue() as RegisterPayload);
-      await this.router.navigate(['/connexion'], {
-        state: { message: 'Compte créé. Vous pouvez maintenant vous connecter.' },
-      });
-    } catch (err) {
+  const values = this.form.getRawValue();
+
+  if (values.role === 'client') {
+    // Inscription normale du client
+    await this.auth.register(values as RegisterPayload);
+
+    await this.router.navigate(['/connexion'], {
+      state: {
+        message: 'Compte créé. Vous pouvez maintenant vous connecter.',
+      },
+    });
+
+  } else if (values.role === 'livreur') {
+    // Envoi de la demande d'inscription livreur
+    await this.auth.submitDeliveryRequest({
+      nom: values.nom!,
+      prenom: values.prenom!,
+      email: values.email!,
+      telephone: values.telephone!,
+    });
+
+    this.successMessage.set(
+      'Votre demande a été envoyée avec succès. Vous recevrez un e-mail après examen par notre équipe.'
+    );
+  }
+}
+    catch (err) {
       const e = err as HttpErrorResponse;
       if (e.error?.errors) this.serverErrors.set(e.error.errors);
       else this.globalError.set(e.error?.message ?? 'Une erreur est survenue, réessayez.');

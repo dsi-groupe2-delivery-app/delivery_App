@@ -4,20 +4,27 @@
   <div class="auth-form">
     <h1>Créer un compte</h1>
     <p class="subtitle">Rejoignez-nous dès maintenant !</p>
-
+    <!-- if livreur afficher msg -->
+@if (form.value.role === 'livreur') {
+  <p class="hint">Votre demande sera examinée par notre équipe. Vous recevrez un e-mail après décision.</p>
+}
     @if (globalError()) {
       <p class="alert alert-error" role="alert">{{ globalError() }}</p>
     }
-
+@if (successMessage()) {
+  <p class="alert alert-success" role="status">
+    {{ successMessage() }}
+  </p>
+}
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <fieldset class="role">
         <legend>Je m'inscris en tant que :</legend>
         <label [class.checked]="form.value.role === 'client'">
-          <input type="radio" formControlName="role" value="client" (change)="clearServerError('role')" />
+          <input type="radio" formControlName="role" value="client" (change)="onRoleChange('client'); clearServerError('role')" />
           Client
         </label>
         <label [class.checked]="form.value.role === 'livreur'">
-          <input type="radio" formControlName="role" value="livreur" (change)="clearServerError('role')" />
+          <input type="radio" formControlName="role" value="livreur" (change)="onRoleChange('livreur'); clearServerError('role')" />
           Livreur
         </label>
       </fieldset>
@@ -56,6 +63,9 @@
         @if (error('telephone')) { <p class="field-error">{{ error('telephone') }}</p> }
       </div>
 
+@if (form.value.role === 'client') {
+  <!-- this password buttons show only for client not livreur -->
+
       <div class="field">
         <label class="input-icon" [class.invalid]="error('password')">
           <app-icon name="lock" />
@@ -78,8 +88,17 @@
         </label>
         @if (error('passwordConfirm')) { <p class="field-error">{{ error('passwordConfirm') }}</p> }
       </div>
-
-      <button type="submit" class="btn-primary" [disabled]="sending()">S'inscrire</button>
+    }
+<!-- show button msg selon role -->
+    <button type="submit" class="btn-primary" [disabled]="sending()">
+  @if (sending()) {
+    Envoi en cours...
+  } @else if (form.value.role === 'livreur') {
+    Envoyer ma demande
+  } @else {
+    S'inscrire
+  }
+</button>
     </form>
 
     <p class="switch">Déjà un compte ? <a routerLink="/connexion">Se connecter</a></p>

@@ -9,5 +9,10 @@ router.post("/register", registerRules, handleValidation, auth.register);
 router.post("/login", loginRules, handleValidation, auth.login);
 router.post("/logout", auth.logout);
 router.get("/me", requireAuth, auth.me);
+router.post(
+  "/change-password",
+  requireAuth,
+  auth.changePassword
+);
 
 module.exports = router;

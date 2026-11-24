@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gestion des livreurs</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    header {
+      padding: 16px 24px;
+      background: #d9480f;
+      color: white;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 16px;
+    }
+
+    .carte {
+      background: white;
+      padding: 20px;
+      margin-bottom: 16px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.1);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    button {
+      padding: 9px 16px;
+      border: 0;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .accepter { background: #198754; }
+    .refuser { background: #dc3545; }
+
+    .statut { font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Gestion des demandes des livreurs</h1>
+</header>
+
+<main>
+  <p><a href="/admin">← Retour au dashboard</a></p>
+
+  <h2>Liste des demandes</h2>
+
+  <% if (demandes.length === 0) { %>
+    <p>Aucune demande pour le moment.</p>
+  <% } %>
+
+  <% demandes.forEach(demande => { %>
+    <div class="carte">
+      <h3><%= demande.prenom %> <%= demande.nom %></h3>
+
+      <p>Email : <%= demande.email %></p>
+      <p>Téléphone : <%= demande.telephone %></p>
+
+      <p>
+        Statut :
+        <span class="statut"><%= demande.statut %></span>
+      </p>
+
+      <p>
+        Date :
+        <%= new Date(demande.dateDemande).toLocaleDateString('fr-FR') %>
+      </p>
+
+      <% if (demande.statut === 'pending') { %>
+        <div class="actions">
+          <form method="POST"
+                action="/admin/livreurs/<%= demande._id %>/accept">
+            <button class="accepter" type="submit">Accepter</button>
+          </form>
+
+          <form method="POST"
+                action="/admin/livreurs/<%= demande._id %>/reject">
+            <button class="refuser" type="submit">Refuser</button>
+          </form>
+        </div>
+      <% } %>
+    </div>
+  <% }) %>
+
+</main>
+</body>
+</html>

@@ -1,5 +1,4 @@
 require("dotenv").config(); // charge backend/.env en local (ignoré sur Azure)
-
 const mongoose = require("mongoose");
 const app = require("./app");
 
@@ -20,3 +19,12 @@ if (!MONGO_URI) {
     .then(() => console.log("MongoDB (Cosmos DB) connecté"))
     .catch((err) => console.error("Erreur de connexion MongoDB :", err.message));
 }
+const transporter = require("./config/email");
+
+transporter.verify((error, success) => {
+    if (error) {
+        console.log("Erreur email :", error);
+    } else {
+        console.log("Serveur Gmail prêt !");
+    }
+});
