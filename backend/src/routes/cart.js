@@ -4,6 +4,7 @@ const express = require("express");
 const ctrl = require("../controllers/cartController");
 const { requireAuth, requireRole } = require("../middlewares/auth");
 const { ajoutRules, modificationRules, valider } = require("../validators/cart");
+const { choixAdresseRules } = require("../validators/adresse");
 
 const router = express.Router();
 
@@ -14,5 +15,6 @@ router.delete("/", ctrl.vider);
 router.post("/lignes", ajoutRules, valider, ctrl.ajouter);
 router.patch("/lignes/:id", modificationRules, valider, ctrl.modifier);
 router.delete("/lignes/:id", ctrl.supprimer);
-
+// US13 : choisir l'adresse de livraison du panier.
+router.put("/adresse", choixAdresseRules, valider, ctrl.choisirAdresse);
 module.exports = router;

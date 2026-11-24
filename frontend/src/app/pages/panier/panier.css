@@ -44,3 +44,14 @@
   .ligne img { width: 4rem; height: 4rem; }
   .droite { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; }
 }
+
+/* US13 : bouton vers l'adresse de livraison, centré sous le récapitulatif */
+.continuer { display: flex; justify-content: center; margin-top: 1.25rem; }
+.btn-continuer {
+  padding: 0.85rem 2rem;
+  font-size: 1.05rem;
+  text-decoration: none;
+  box-shadow: 0 6px 16px rgba(215, 38, 43, 0.3);
+  transition: background 0.15s, transform 0.15s;
+}
+.btn-continuer:hover { background: var(--primary-dark); transform: translateY(-1px); }
