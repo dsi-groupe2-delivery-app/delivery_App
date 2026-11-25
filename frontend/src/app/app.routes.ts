@@ -12,6 +12,7 @@ import { Livraison } from './pages/livraison/livraison';
 import { panierNonVideGuard } from './core/panier.guard';
 import { Recapitulatif } from './pages/recapitulatif/recapitulatif';
 import { Paiement } from './pages/paiement/paiement';
+import { PaiementConfirmation } from './pages/paiement-confirmation/paiement-confirmation';
 // Chaque story ajoute ses routes ici. Exemple pour une page réservée au livreur (US05) :
 //   { path: 'livreur', component: ..., canActivate: [authGuard, roleGuard('livreur')] }
 export const routes: Routes = [
@@ -36,8 +37,14 @@ export const routes: Routes = [
   { path: 'livraison', component: Livraison, canActivate: [authGuard, roleGuard('client'), panierNonVideGuard], title: 'Adresse de livraison' },
   // US14 : récapitulatif et validation du panier.
   { path: 'recapitulatif', component: Recapitulatif, canActivate: [authGuard, roleGuard('client')], title: 'Récapitulatif' },
-  // Étape du paiement, après la validation du panier (le formulaire arrive avec US15).
+  // US15 : paiement d'une commande validée, puis confirmation.
   { path: 'paiement/:numero', component: Paiement, canActivate: [authGuard, roleGuard('client')], title: 'Paiement' },
+  {
+    path: 'paiement/:numero/confirmation',
+    component: PaiementConfirmation,
+    canActivate: [authGuard, roleGuard('client')],
+    title: 'Paiement accepté',
+  },
   { path: '**', redirectTo: '' },
 
 ];

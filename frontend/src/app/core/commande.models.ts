@@ -1,4 +1,4 @@
-// US14 : une commande telle que l'API la renvoie (montants en TND, calculés par le serveur).
+// US14 / US15 : une commande telle que l'API la renvoie (montants en TND, calculés par le serveur).
 
 export type StatutCommande =
   | 'en_attente_paiement'
@@ -17,6 +17,16 @@ export interface LigneCommande {
   totalLigne: number;
   /** Choix d'un menu composé : [{ libelle: 'Boisson', options: ["Jus d'orange"] }]. */
   choix: { libelle: string; options: string[] }[];
+}
+
+export interface Transaction {
+  reference: string;
+  moyen: string;
+  statut: 'acceptee' | 'refusee';
+  montant: number;
+  derniers4: string;
+  motif?: string;
+  date: string;
 }
 
 export interface Commande {
@@ -38,4 +48,20 @@ export interface Commande {
   };
   total: number;
   creeeLe: string;
+  payeeLe: string | null;
+  transactions: Transaction[];
+}
+
+export interface MoyenPaiement {
+  code: string;
+  libelle: string;
+}
+
+/** Données du formulaire de paiement (jamais conservées par le serveur, sauf les 4 derniers chiffres). */
+export interface DonneesPaiement {
+  moyen: string;
+  titulaire: string;
+  numeroCarte: string;
+  expiration: string;
+  cvv: string;
 }

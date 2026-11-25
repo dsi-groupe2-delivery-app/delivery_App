@@ -1,10 +1,11 @@
-// US14 (valider le panier) : règles métier des commandes.
+// US14 (valider le panier) et US15 (payer en ligne) : règles métier des commandes.
 // Le serveur est seul juge : le contenu et le total viennent du panier recalculé, jamais du navigateur.
 const repo = require("../repositories/commandeRepository");
 const cartRepo = require("../repositories/cartRepository");
 const { lirePanier } = require("./cartService");
 const { ErreurMetier } = require("../utils/erreurs");
 const { LIBELLES_STATUT } = require("../models/Commande");
+const paiement = require("../utils/paiementSimule");
 
 const enMillimes = (tnd) => Math.round(Number(tnd) * 1000);
 
@@ -32,6 +33,16 @@ function vueCommande(c) {
     adresse: c.adresse,
     total: c.totalMillimes / 1000,
     creeeLe: c.createdAt,
+    payeeLe: c.payeeLe,
+    transactions: c.transactions.map((t) => ({
+      reference: t.reference,
+      moyen: t.moyen,
+      statut: t.statut,
+      montant: t.montantMillimes / 1000,
+      derniers4: t.derniers4,
+      motif: t.motif,
+      date: t.date,
+    })),
   };
 }
 
@@ -115,4 +126,51 @@ async function lireCommande(clientId, numero) {
   return vueCommande(commande);
 }
 
-module.exports = { validerPanier, lireCommande, vueCommande, jourTunis };
+// ---------- US15 : payer en ligne ----------
+
+async function commandeAPayer(clientId, numero) {
+  const commande = await repo.duClient(numero, clientId);
+  if (!commande) throw new ErreurMetier(404, "Commande introuvable");
+  if (commande.statut === "annulee") throw new ErreurMetier(409, "Cette commande a été annulée");
+  if (commande.statut !== "en_attente_paiement") throw new ErreurMetier(409, "Cette commande est déjà payée");
+  return commande;
+}
+
+// POST /api/commandes/:numero/paiement : { moyen, titulaire, numeroCarte, expiration, cvv }
+// (déjà validés par validators/commande.js). Le numéro complet et le CVV ne sont jamais enregistrés.
+async function payer(clientId, numero, { moyen, numeroCarte }) {
+  const commande = await commandeAPayer(clientId, numero);
+  const carte = paiement.chiffres(numeroCarte);
+  const transaction = {
+    reference: paiement.nouvelleReference(),
+    moyen,
+    montantMillimes: commande.totalMillimes,
+    derniers4: carte.slice(-4),
+    date: new Date(),
+  };
+
+  const reponse = paiement.demanderAutorisation(carte);
+  if (!reponse.acceptee) {
+    // Paiement refusé : la commande reste « En attente de paiement », la tentative est tracée.
+    await repo.ajouterTransaction(commande._id, { ...transaction, statut: "refusee", motif: reponse.motif });
+    throw new ErreurMetier(402, `Paiement refusé : ${reponse.motif.toLowerCase()}. Vérifiez votre carte ou essayez-en une autre.`);
+  }
+
+  // Changement atomique : si deux paiements arrivent en même temps, un seul passe.
+  const payee = await repo.changerStatutSi(commande._id, "en_attente_paiement", "payee", {
+    $set: { payeeLe: transaction.date },
+    $push: { transactions: { ...transaction, statut: "acceptee" } },
+  });
+  if (!payee) throw new ErreurMetier(409, "Cette commande est déjà payée");
+  return vueCommande(payee);
+}
+
+// POST /api/commandes/:numero/annulation : le client abandonne le paiement.
+async function annuler(clientId, numero) {
+  const commande = await commandeAPayer(clientId, numero);
+  const annulee = await repo.changerStatutSi(commande._id, "en_attente_paiement", "annulee");
+  if (!annulee) throw new ErreurMetier(409, "Cette commande ne peut plus être annulée");
+  return vueCommande(annulee);
+}
+
+module.exports = { validerPanier, lireCommande, payer, annuler, vueCommande, jourTunis };

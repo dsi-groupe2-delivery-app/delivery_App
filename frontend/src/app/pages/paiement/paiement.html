@@ -1,4 +1,6 @@
 <section class="page-commande">
+  <h1>Paiement sécurisé</h1>
+
   @if (chargement()) {
     <p class="etat">Chargement…</p>
   } @else if (!commande()) {
@@ -6,14 +8,93 @@
       <p class="alerte">{{ erreur() || 'Commande introuvable.' }}</p>
       <a routerLink="/mon-espace" class="btn btn-clair">Retour à mon espace</a>
     </div>
-  } @else {
+  } @else if (commande()!.statut === 'annulee') {
     <div class="carte-statut">
-      <h1>Commande enregistrée</h1>
-      <p>Commande n° <strong>{{ commande()!.numero }}</strong></p>
-      <p>Statut : <span class="pastille">{{ commande()!.libelleStatut }}</span></p>
-      <p>Total : <strong>{{ commande()!.total | tnd }}</strong></p>
-      <p class="aide">Le paiement en ligne sera disponible prochainement.</p>
-      <a routerLink="/mon-espace" class="btn btn-clair">Retour à mon espace</a>
+      <h1>Commande annulée</h1>
+      <p>La commande <strong>{{ commande()!.numero }}</strong> a été annulée : aucun paiement n'a été effectué.</p>
+      <p><span class="pastille annulee">{{ commande()!.libelleStatut }}</span></p>
+      <a routerLink="/carte" class="btn">Retour à la carte</a>
+    </div>
+  } @else {
+    <p class="sous-titre">
+      Commande <strong>{{ commande()!.numero }}</strong> enregistrée ·
+      <span class="pastille">{{ commande()!.libelleStatut }}</span>
+    </p>
+
+    @if (erreur()) {
+      <p class="alert alert-error" role="alert">{{ erreur() }}</p>
+    }
+
+    <div class="grille">
+      <form class="bloc" [formGroup]="form" (ngSubmit)="payer()" novalidate>
+        <h2>Moyen de paiement</h2>
+        <div class="moyens">
+          @for (m of moyens(); track m.code) {
+            <label class="moyen" [class.actif]="form.value.moyen === m.code">
+              <input type="radio" formControlName="moyen" [value]="m.code" (change)="effacerErreur('moyen')" />
+              {{ m.libelle }}
+            </label>
+          }
+        </div>
+        @if (erreurChamp('moyen')) { <p class="field-error">{{ erreurChamp('moyen') }}</p> }
+
+        <div class="champ">
+          <label for="titulaire">Nom sur la carte *</label>
+          <input id="titulaire" formControlName="titulaire" autocomplete="cc-name" placeholder="AMIRA BEN SALAH" (input)="effacerErreur('titulaire')" />
+          @if (erreurChamp('titulaire')) { <p class="field-error">{{ erreurChamp('titulaire') }}</p> }
+        </div>
+
+        <div class="champ">
+          <label for="numeroCarte">Numéro de carte *</label>
+          <input id="numeroCarte" formControlName="numeroCarte" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456" maxlength="19" (input)="formaterCarte()" />
+          @if (erreurChamp('numeroCarte')) {
+            <p class="field-error">{{ erreurChamp('numeroCarte') }}</p>
+          } @else {
+            <p class="aide">16 chiffres</p>
+          }
+        </div>
+
+        <div class="ligne-champs">
+          <div class="champ">
+            <label for="expiration">Expiration *</label>
+            <input id="expiration" formControlName="expiration" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/AA" maxlength="5" (input)="formaterExpiration()" />
+            @if (erreurChamp('expiration')) { <p class="field-error">{{ erreurChamp('expiration') }}</p> }
+          </div>
+          <div class="champ">
+            <label for="cvv">CVV *</label>
+            <input id="cvv" type="password" formControlName="cvv" inputmode="numeric" autocomplete="cc-csc" placeholder="•••" maxlength="3" (input)="effacerErreur('cvv')" />
+            @if (erreurChamp('cvv')) {
+              <p class="field-error">{{ erreurChamp('cvv') }}</p>
+            } @else {
+              <p class="aide">3 chiffres au dos de la carte</p>
+            }
+          </div>
+        </div>
+
+        <button type="submit" class="btn" [disabled]="enCours()">
+          {{ enCours() ? 'Paiement en cours…' : 'Payer ' + (commande()!.total | tnd) }}
+        </button>
+      </form>
+
+      <div>
+        <div class="bloc">
+          <h2>Votre commande</h2>
+          @for (l of commande()!.lignes; track $index) {
+            <p class="ligne-resume"><span>{{ l.quantite }} × {{ l.nom }}</span><span>{{ l.totalLigne | tnd }}</span></p>
+          }
+          <p class="total"><span>Total à payer</span><span>{{ commande()!.total | tnd }}</span></p>
+        </div>
+
+        @if (confirmerAnnulation()) {
+          <div class="bloc confirmer">
+            <p>Annuler cette commande ? Elle ne sera pas payée.</p>
+            <button type="button" class="btn danger" [disabled]="enCours()" (click)="annuler()">Oui, annuler</button>
+            <button type="button" class="btn btn-clair" (click)="confirmerAnnulation.set(false)">Non, continuer le paiement</button>
+          </div>
+        } @else {
+          <button type="button" class="btn btn-clair" [disabled]="enCours()" (click)="confirmerAnnulation.set(true)">Annuler la commande</button>
+        }
+      </div>
     </div>
   }
 </section>

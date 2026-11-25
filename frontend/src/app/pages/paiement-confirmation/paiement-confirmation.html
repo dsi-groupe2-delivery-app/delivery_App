@@ -1,0 +1,24 @@
+<section class="page-commande">
+  @if (erreur()) {
+    <div class="carte-statut">
+      <p class="alerte">{{ erreur() }}</p>
+      <a routerLink="/mon-espace" class="btn btn-clair">Retour à mon espace</a>
+    </div>
+  } @else if (commande(); as c) {
+    <div class="carte-statut">
+      <span class="icone-ok" aria-hidden="true">✓</span>
+      <h1>Paiement accepté</h1>
+      <p>Commande n° <strong>{{ c.numero }}</strong></p>
+      <p>Statut : <span class="pastille" [class.payee]="c.statut !== 'annulee'">{{ c.libelleStatut }}</span></p>
+      <p>Montant payé : <strong>{{ c.total | tnd }}</strong></p>
+      @if (transaction(); as t) {
+        <p class="aide">Transaction {{ t.reference }} · carte •••• {{ t.derniers4 }}</p>
+      }
+      <p class="aide">Votre commande a été transmise au restaurant.</p>
+      <!-- US22 (suivi des commandes) remplacera ce lien par « Suivre ma commande ». -->
+      <a routerLink="/mon-espace" class="btn">Retour à mon espace</a>
+    </div>
+  } @else {
+    <p class="etat">Chargement…</p>
+  }
+</section>
