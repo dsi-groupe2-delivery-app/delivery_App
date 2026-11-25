@@ -1,15 +1,19 @@
-<%- include("partials/haut", { titre: "Nouveau produit" }) %>
+<% const modification = Boolean(produit); %>
+<%- include("partials/haut", { titre: modification ? "Modifier le produit" : "Nouveau produit" }) %>
 
 <div class="bloc">
-  <h2>Nouveau produit</h2>
+  <h2><%= modification ? "Modifier le produit" : "Nouveau produit" %></h2>
 
   <% if (categories.length === 0) { %>
     <!-- Impossible d'ajouter un produit sans catégorie -->
     <p>Aucune catégorie n'existe encore. Créez d'abord une catégorie.</p>
     <a href="/admin/categories" class="bouton">Créer une catégorie</a>
   <% } else { %>
-    <!-- enctype obligatoire pour envoyer un fichier (image) -->
-    <form method="POST" action="/admin/produits" enctype="multipart/form-data">
+    <!-- enctype obligatoire pour envoyer un fichier (image).
+         En modification, _method=PUT transforme le POST en PUT (method-override). -->
+    <form method="POST"
+          action="<%= modification ? '/admin/produits/' + produit._id + '?_method=PUT' : '/admin/produits' %>"
+          enctype="multipart/form-data">
       <label for="nom">Nom</label>
       <input type="text" id="nom" name="nom" value="<%= valeurs.nom || '' %>">
       <% if (erreurs.nom) { %><p class="erreur"><%= erreurs.nom %></p><% } %>
@@ -32,7 +36,16 @@
       </select>
       <% if (erreurs.categorie) { %><p class="erreur"><%= erreurs.categorie %></p><% } %>
 
-      <label for="image">Image (jpg, png ou webp, 2 Mo maximum)</label>
+      <% if (modification && produit.image) { %>
+        <p>Image actuelle :</p>
+        <img src="/uploads/<%= produit.image %>" alt="Image actuelle du produit"
+             style="max-width: 160px; border-radius: 4px;">
+      <% } %>
+
+      <label for="image">
+        <%= modification ? "Nouvelle image (laisser vide pour garder l'image actuelle)" : "Image" %>
+        — jpg, png ou webp, 2 Mo maximum
+      </label>
       <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp">
       <% if (erreurs.image) { %><p class="erreur"><%= erreurs.image %></p><% } %>
       <img id="apercu" alt="" style="display: none; max-width: 160px; margin-top: 8px; border-radius: 4px;">
@@ -42,7 +55,12 @@
         Disponible
       </label>
 
-      <button type="submit" class="bouton">Ajouter le produit</button>
+      <button type="submit" class="bouton">
+        <%= modification ? "Enregistrer les modifications" : "Ajouter le produit" %>
+      </button>
+      <% if (modification) { %>
+        <a href="/admin/produits" class="bouton">Annuler</a>
+      <% } %>
     </form>
 
     <script>
@@ -50,6 +68,7 @@
       document.getElementById("image").addEventListener("change", (event) => {
         const fichier = event.target.files[0];
         const apercu = document.getElementById("apercu");
+        if (apercu.src) URL.revokeObjectURL(apercu.src); // libère l'ancien aperçu
         if (fichier) {
           apercu.src = URL.createObjectURL(fichier);
           apercu.style.display = "block";

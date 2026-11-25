@@ -1,10 +1,10 @@
 // US06 : l'agent ajoute des catégories et des produits (Back-Office).
-const fs = require("fs");
-const mongoose = require("mongoose");
+
 const Category = require("../models/Category");
 const Product = require("../models/Product");
 const { upload } = require("../config/upload");
-const { tndVersMillimes, millimesVersTnd } = require("../utils/prix");
+const produitService = require("../services/produitService");
+const { millimesVersTnd } = require("../utils/prix");
 
 // Message de succès gardé en session pour la page suivante (affiché une seule fois).
 function lireMessage(req) {
@@ -70,13 +70,13 @@ async function creerCategorie(req, res) {
 
 // ---------- Produits ----------
 
-// Affiche le formulaire d'ajout d'un produit.
-async function afficherFormulaireProduit(req, res, erreurs = {}, valeurs = { disponible: "on" }) {
+async function afficherFormulaireProduit(req, res, erreurs = {}, valeurs = { disponible: "on" }, produit = null) {
   const categories = await toutesLesCategories();
   res.status(Object.keys(erreurs).length ? 400 : 200).render("produit-form", {
     categories,
     erreurs,
     valeurs,
+    produit,
   });
 }
 
@@ -96,44 +96,80 @@ function recevoirImage(req, res) {
 async function creerProduit(req, res) {
   const erreurUpload = await recevoirImage(req, res);
   const body = req.body || {};
-  const erreurs = {};
-
-  if (erreurUpload) {
-    erreurs.image =
-      erreurUpload.code === "LIMIT_FILE_SIZE"
-        ? "Image trop lourde : 2 Mo maximum"
-        : erreurUpload.message;
-  }
-
-  const nom = (body.nom || "").trim();
-  if (!nom) erreurs.nom = "Le nom est obligatoire";
-
-  const prixMillimes = tndVersMillimes(body.prix);
-  if (!prixMillimes) {
-    erreurs.prix = "Le prix doit être supérieur à 0 (3 décimales maximum, ex. 12.500)";
-  }
-
-  const categorieExiste =
-    mongoose.isValidObjectId(body.categorie) && (await Category.exists({ _id: body.categorie }));
-  if (!categorieExiste) erreurs.categorie = "Choisissez une catégorie existante";
+  const { erreurs, donnees } = await produitService.validerProduit(body, erreurUpload);
 
   if (Object.keys(erreurs).length) {
     // Rien n'est créé : on supprime l'image déjà reçue.
-    if (req.file) fs.unlink(req.file.path, () => {});
+    if (req.file) await produitService.supprimerImage(req.file.filename);
     return afficherFormulaireProduit(req, res, erreurs, body);
   }
 
   await Product.create({
-    nom,
-    description: (body.description || "").trim(),
-    prixMillimes,
+    nom: donnees.nom,
+    description: donnees.description,
+    prixMillimes: donnees.prixMillimes,
+    categorie: donnees.categorie,
+    disponible: donnees.disponible,
     image: req.file ? req.file.filename : null,
-    categorie: body.categorie,
-    disponible: body.disponible === "on", // case à cocher
   });
 
-  req.session.message = `Produit « ${nom} » ajouté`;
+  req.session.message = `Produit « ${donnees.nom} » ajouté`;
   res.redirect("/admin/categories");
+}
+//  US07 : liste et modification des produits 
+
+async function listeProduits(req, res) {
+  // La catégorie choisie dans le filtre (texte vide si « Toutes »)
+  const categorieChoisie = String(req.query.categorie || "");
+
+  const { produits, categories, filtre } = await produitService.listerProduits(categorieChoisie);
+
+  res.render("produits", {
+    produits,
+    categories,
+    filtre,
+    message: lireMessage(req), // message de confirmation 
+    millimesVersTnd,          
+  });
+}
+
+function produitIntrouvable(res) {
+  res.status(404).render("404", {
+    titre: "Produit introuvable",
+    texte: "Ce produit n'existe pas ou a été supprimé.",
+    lienRetour: "/admin/produits",
+  });
+}
+
+async function afficherFormulaireModification(req, res) {
+  const resultat = await produitService.valeursProduit(req.params.id);
+  if (!resultat) return produitIntrouvable(res);
+  await afficherFormulaireProduit(req, res, {}, resultat.valeurs, resultat.produit);
+}
+
+async function enregistrerModificationProduit(req, res) {
+  const erreurUpload = await recevoirImage(req, res);
+  const nouvelleImage = req.file ? req.file.filename : null;
+
+  // Produit inexistant : l'image reçue ne sert à rien.
+  const resultat = await produitService.valeursProduit(req.params.id);
+  if (!resultat) {
+    await produitService.supprimerImage(nouvelleImage);
+    return produitIntrouvable(res);
+  }
+
+  const body = req.body || {};
+  const { erreurs, donnees } = await produitService.validerProduit(body, erreurUpload);
+
+  if (Object.keys(erreurs).length) {
+    // Rien n'est modifié : on supprime l'image reçue et on réaffiche le formulaire.
+    await produitService.supprimerImage(nouvelleImage);
+    return afficherFormulaireProduit(req, res, erreurs, body, resultat.produit);
+  }
+
+  await produitService.modifierProduit(req.params.id, donnees, nouvelleImage);
+  req.session.message = `Produit « ${donnees.nom} » modifié avec succès`;
+  res.redirect("/admin/produits");
 }
 
 module.exports = {
@@ -141,4 +177,7 @@ module.exports = {
   creerCategorie,
   nouveauProduit,
   creerProduit,
+  listeProduits,
+  afficherFormulaireModification,
+  enregistrerModificationProduit,
 };
