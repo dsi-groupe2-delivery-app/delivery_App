@@ -8,6 +8,7 @@ const adminRoutes = require("./routes/admin");
 const { UPLOADS_DIR } = require("./config/upload");
 const catalogueApiRoutes = require("./routes/catalogueApi");
 const cartRoutes = require("./routes/cart");
+const adresseRoutes = require("./routes/adresses");
 const app = express();
 const deliveryRequestRoutes = require("./routes/deliveryRequest");
 
@@ -72,6 +73,8 @@ app.use('/admin/menus-composes', require('./routes/menuComposeRoutes'));
 app.use("/api", catalogueApiRoutes);
 // Panier du client (US11)
 app.use("/api/panier", cartRoutes);
+// Adresses de livraison du client (US13)
+app.use("/api/adresses", adresseRoutes);
 // Erreurs non gérées : réponse générique, sans détail technique pour le client.
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {

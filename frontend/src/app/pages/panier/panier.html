@@ -85,6 +85,10 @@
           <button type="button" class="btn btn-clair" [disabled]="enCours()" (click)="confirmerVidage.set(true)">Vider le panier</button>
         }
       </div>
+      <!-- US13 : étape suivante de la commande -->
+      <div class="continuer">
+        <a routerLink="/livraison" class="btn btn-continuer">Continuer : adresse de livraison →</a>
+      </div>
     }
   </section>
   

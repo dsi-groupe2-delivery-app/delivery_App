@@ -1,6 +1,6 @@
 // US11 / US12 : le panier tel que le renvoie l'API. Tout est calculé par le serveur.
 import { Choix } from './catalogue.models';
-
+import { Adresse } from './adresse.models';
 export interface AlerteLigne {
   type: 'indisponible' | 'prix_modifie';
   message: string;
@@ -28,4 +28,5 @@ export interface Panier {
   lignes: LignePanier[];
   nombreArticles: number;
   total: number;
+  adresse?: Adresse;
 }

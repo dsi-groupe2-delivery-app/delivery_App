@@ -61,6 +61,11 @@ export class CartService {
     return this.envoyer(this.http.delete<Panier>(API));
   }
 
+  /** US13 : associe une adresse de livraison au panier. */
+  choisirAdresse(adresseId: string) {
+    return this.envoyer(this.http.put<Panier>(`${API}/adresse`, { adresseId }));
+  }
+
   private async envoyer(requete: Observable<Panier>): Promise<Panier> {
     const panier = await firstValueFrom(requete);
     this._panier.set(panier);

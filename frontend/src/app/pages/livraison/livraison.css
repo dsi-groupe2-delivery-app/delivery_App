@@ -1,0 +1,88 @@
+/* US13 : page Adresse de livraison (couleurs et arrondis du thème : styles.css). */
+.livraison { max-width: 860px; margin: 0 auto; padding: 2rem 1rem; }
+
+.entete { margin-bottom: 1.25rem; }
+.entete h1 { margin: 0; }
+.sous-titre { margin: 0.3rem 0 0; color: var(--muted); }
+
+/* Carte blanche qui contient tout le formulaire */
+.carte {
+  padding: 1.75rem;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+/* ---------- Adresses enregistrées : cartes cliquables ---------- */
+.adresses { display: grid; gap: 0.6rem; margin: 0 0 1.5rem; padding: 0; border: 0; }
+.adresses legend { margin-bottom: 0.6rem; font-weight: 700; }
+.option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.option:hover { border-color: var(--primary); }
+.option.active { border-color: var(--primary); background: var(--primary-soft); }
+.option input { accent-color: var(--primary); width: 18px; height: 18px; }
+.option span { display: flex; flex-direction: column; }
+.option small { color: var(--muted); }
+
+/* ---------- Champs : 3 colonnes comme la maquette ---------- */
+.grille { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem 1.25rem; }
+.large { grid-column: span 2; }
+
+.champ label { display: block; margin-bottom: 0.35rem; font-weight: 600; font-size: 0.95rem; }
+.champ input,
+.champ textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.champ textarea { resize: vertical; }
+.champ input:focus,
+.champ textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+.champ .invalide { border-color: var(--error); }
+.aide { margin: 0.3rem 0 0; color: var(--muted); font-size: 0.8rem; }
+
+.case { display: flex; align-items: center; gap: 0.6rem; margin: 1.25rem 0 0; cursor: pointer; }
+.case input { accent-color: var(--primary); width: 18px; height: 18px; }
+
+/* ---------- Boutons : Retour (secondaire) et Continuer (principal) ---------- */
+.actions { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 1.75rem; }
+
+.btn-retour,
+.btn-continuer {
+  padding: 0.85rem 2rem;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.btn-retour { border: 1px solid var(--primary); background: var(--surface); color: var(--primary); }
+.btn-retour:hover { background: var(--primary-soft); }
+
+.btn-continuer {
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(215, 38, 43, 0.3);
+}
+.btn-continuer:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.btn-continuer:disabled { opacity: 0.6; cursor: wait; transform: none; }
+@media (max-width: 700px) {
+  .carte { padding: 1.25rem; }
+  .grille { grid-template-columns: 1fr; }
+  .large { grid-column: auto; }
+}

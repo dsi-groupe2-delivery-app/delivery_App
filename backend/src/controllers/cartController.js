@@ -23,3 +23,7 @@ exports.supprimer = gerer(async (req, res) => {
 exports.vider = gerer(async (req, res) => {
   res.json(await panier.viderPanier(req.user._id));
 });
+
+exports.choisirAdresse = gerer(async (req, res) => {
+  res.json(await panier.choisirAdresse(req.user._id, req.body.adresseId));
+});

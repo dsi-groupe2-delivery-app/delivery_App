@@ -6,7 +6,7 @@ const { computeMenuComposePrice, MenuChoiceError } = require("../utils/computeMe
 const { getEffectiveAvailability } = require("../utils/availability");
 const { imageProduit, imageMenu } = require("./catalogueService");
 const { ErreurMetier } = require("../utils/erreurs");
-
+const { adresseDuClient } = require("./adresseService");
 const QUANTITE_MAX = 20;
 
 const idDe = (x) => String(x && x._id ? x._id : x);
@@ -204,11 +204,16 @@ async function vuePanier(panier) {
     .filter((v) => v.disponible)
     .reduce((somme, v) => somme + enMillimes(v.totalLigne), 0);
 
-  return {
+  const vue = {
     lignes: vues,
     nombreArticles: vues.reduce((n, v) => n + v.quantite, 0),
     total: totalMillimes / 1000,
   };
+
+  // US13 : on ajoute l'adresse choisie pour l'afficher quand le client revient sur la page.
+  // Sans adresse, la réponse reste la même qu'avant (les tests du panier ne changent pas).
+  if (panier && panier.adresse) vue.adresse = await adresseDuClient(panier.adresse, panier.client);
+  return vue;
 }
 
 // ---------- Opérations (US11 et US12) ----------
@@ -325,5 +330,17 @@ async function viderPanier(clientId) {
   await panier.save();
   return vuePanier(panier);
 }
+// US13 : associe une adresse au panier du client.
+// 404 si l'adresse n'est pas à lui, 400 si le panier est vide.
+async function choisirAdresse(clientId, adresseId) {
+  const adresse = await adresseDuClient(adresseId, clientId);
+  if (!adresse) throw new ErreurMetier(404, "Adresse introuvable");
 
-module.exports = { QUANTITE_MAX, lirePanier, ajouterLigne, modifierLigne, supprimerLigne, viderPanier };
+  const panier = await repo.trouverParClient(clientId);
+  if (!panier || panier.lignes.length === 0) throw new ErreurMetier(400, "Votre panier est vide");
+
+  panier.adresse = adresse._id;
+  await panier.save();
+  return vuePanier(panier);
+}
+module.exports = { QUANTITE_MAX, lirePanier, ajouterLigne, modifierLigne, supprimerLigne, viderPanier, choisirAdresse };

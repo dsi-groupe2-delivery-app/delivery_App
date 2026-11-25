@@ -35,6 +35,7 @@ const cartSchema = new mongoose.Schema(
     // unique : un client = un panier. Index défini dès la création du modèle (règle Cosmos DB).
     client: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, unique: true },
     lignes: [ligneSchema],
+     adresse: { type: mongoose.Schema.Types.ObjectId, ref: "Adresse", default: null },
   },
   { timestamps: true }
 );
