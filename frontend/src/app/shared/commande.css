@@ -1,0 +1,41 @@
+/* US14 / US15 : styles communs aux pages récapitulatif, commande, paiement et confirmation. */
+:host { display: block; }
+.page-commande { max-width: 60rem; margin: 0 auto; }
+.page-commande h1 { font-size: 1.75rem; margin-bottom: 0.3rem; }
+.sous-titre { margin: 0 0 1.25rem; color: var(--muted); }
+.etat { padding: 2rem 0; color: var(--muted); text-align: center; }
+
+.grille { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 1rem; align-items: start; }
+.bloc { padding: 1.25rem; border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); }
+.bloc h2 { margin: 0 0 0.75rem; font-size: 1.05rem; }
+
+.articles { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.articles th { padding: 0 0 0.5rem; color: var(--muted); font-weight: 600; text-align: left; }
+.articles td { padding: 0.6rem 0; border-top: 1px solid var(--border); vertical-align: top; }
+.articles .nb { text-align: right; white-space: nowrap; }
+.detail { display: block; color: var(--muted); font-size: 0.82rem; }
+.alerte { display: block; margin-top: 0.3rem; color: var(--error); font-size: 0.82rem; }
+.alerte.prix { color: #8a5200; }
+
+.adresse p { margin: 0.15rem 0; }
+.lien { color: var(--primary); font-weight: 600; text-decoration: none; }
+
+.total { display: flex; justify-content: space-between; margin: 1rem 0 0; padding-top: 0.75rem; border-top: 2px solid var(--border); font-size: 1.15rem; font-weight: 700; }
+.total span:last-child { color: var(--primary); }
+
+.btn { display: inline-block; width: 100%; margin-top: 1rem; padding: 0.8rem 1rem; border: none; border-radius: 10px; background: var(--primary); color: #fff; font: inherit; font-weight: 600; text-align: center; text-decoration: none; cursor: pointer; }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn-clair { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.aide { margin: 0.5rem 0 0; color: var(--muted); font-size: 0.85rem; }
+
+.carte-statut { max-width: 30rem; margin: 1rem auto; padding: 2rem; border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); text-align: center; }
+.carte-statut h1 { margin-bottom: 1rem; }
+.carte-statut p { margin: 0.35rem 0; }
+.pastille { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 999px; background: #fff4e0; color: #8a5200; font-size: 0.85rem; font-weight: 600; }
+.pastille.payee { background: var(--success-bg); color: var(--success); }
+.pastille.annulee { background: var(--error-bg); color: var(--error); }
+.icone-ok { display: inline-grid; place-items: center; width: 4rem; height: 4rem; margin-bottom: 0.75rem; border-radius: 50%; background: var(--success-bg); color: var(--success); font-size: 2rem; }
+
+@media (max-width: 760px) {
+  .grille { grid-template-columns: minmax(0, 1fr); }
+}

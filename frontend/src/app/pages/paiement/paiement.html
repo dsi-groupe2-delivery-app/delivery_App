@@ -1,0 +1,19 @@
+<section class="page-commande">
+  @if (chargement()) {
+    <p class="etat">Chargement…</p>
+  } @else if (!commande()) {
+    <div class="carte-statut">
+      <p class="alerte">{{ erreur() || 'Commande introuvable.' }}</p>
+      <a routerLink="/mon-espace" class="btn btn-clair">Retour à mon espace</a>
+    </div>
+  } @else {
+    <div class="carte-statut">
+      <h1>Commande enregistrée</h1>
+      <p>Commande n° <strong>{{ commande()!.numero }}</strong></p>
+      <p>Statut : <span class="pastille">{{ commande()!.libelleStatut }}</span></p>
+      <p>Total : <strong>{{ commande()!.total | tnd }}</strong></p>
+      <p class="aide">Le paiement en ligne sera disponible prochainement.</p>
+      <a routerLink="/mon-espace" class="btn btn-clair">Retour à mon espace</a>
+    </div>
+  }
+</section>
