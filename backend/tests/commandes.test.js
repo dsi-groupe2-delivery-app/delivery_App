@@ -1,4 +1,4 @@
-// Tests US14 (valider le panier), sur une base MongoDB en mémoire.
+// Tests US14 (valider le panier) et US15 (payer en ligne), sur une base MongoDB en mémoire.
 const { test, before, after, beforeEach } = require("node:test");
 const assert = require("node:assert");
 const mongoose = require("mongoose");
@@ -13,6 +13,7 @@ const Adresse = require("../src/models/Adresse");
 const Commande = require("../src/models/Commande");
 const Compteur = require("../src/models/Compteur");
 const { navigateur, connecter } = require("./aide-api");
+const { luhnValide, expirationValide } = require("../src/utils/paiementSimule");
 
 let mongod;
 let server;
@@ -48,6 +49,10 @@ const ADRESSE = {
   instructions: "Sonner 2 fois",
   enregistrer: true,
 };
+
+// Carte de test acceptée, et carte de test toujours refusée.
+const CARTE_OK = { moyen: "carte_bancaire", titulaire: "Amira Ben Salah", numeroCarte: "4242 4242 4242 4242", expiration: "12/30", cvv: "123" };
+const CARTE_REFUSEE = { ...CARTE_OK, numeroCarte: "4000 0000 0000 0002" };
 
 let n = 0;
 const cle = () => `cle-test-${++n}-${Date.now()}`;
@@ -168,4 +173,116 @@ test("US14 un client ne voit pas la commande d'un autre (404)", async () => {
   const commande = await a.appeler("POST", "/api/commandes", { cle: cle() });
   const autre = await connecter(baseUrl, "client", "b@mail.com");
   assert.strictEqual((await autre("GET", `/api/commandes/${commande.body.numero}`)).status, 404);
+  assert.strictEqual((await autre("POST", `/api/commandes/${commande.body.numero}/paiement`, CARTE_OK)).status, 404);
+});
+
+// ---------- US15 : payer en ligne ----------
+
+async function commandeEnAttente() {
+  const { appeler } = await clientAvecPanier();
+  const res = await appeler("POST", "/api/commandes", { cle: cle() });
+  return { appeler, numero: res.body.numero };
+}
+
+test("US15 moyens de paiement proposés", async () => {
+  const appeler = await connecter(baseUrl, "client");
+  const res = await appeler("GET", "/api/commandes/moyens-paiement");
+  assert.strictEqual(res.status, 200);
+  assert.deepStrictEqual(res.body.map((m) => m.code), ["carte_bancaire", "edinar"]);
+});
+
+test("US15 paiement réussi : statut Payée, transaction tracée sans données sensibles", async () => {
+  const { appeler, numero } = await commandeEnAttente();
+  const res = await appeler("POST", `/api/commandes/${numero}/paiement`, CARTE_OK);
+  assert.strictEqual(res.status, 200);
+  assert.strictEqual(res.body.statut, "payee");
+  assert.strictEqual(res.body.libelleStatut, "Payée");
+  assert.ok(res.body.payeeLe);
+  assert.strictEqual(res.body.transactions.length, 1);
+  assert.strictEqual(res.body.transactions[0].statut, "acceptee");
+  assert.strictEqual(res.body.transactions[0].montant, 31);
+  assert.strictEqual(res.body.transactions[0].derniers4, "4242");
+  assert.match(res.body.transactions[0].reference, /^PAY-[0-9A-F]{10}$/);
+
+  // Ni le numéro complet ni le CVV ne sont enregistrés en base.
+  const brut = JSON.stringify(await Commande.findOne({ numero }).lean());
+  assert.ok(!brut.includes("4242424242424242"));
+  assert.ok(!brut.includes("4242 4242 4242 4242"));
+  assert.ok(!brut.includes('"123"'));
+  assert.deepStrictEqual(
+    (await Commande.findOne({ numero }).lean()).historique.map((h) => h.statut),
+    ["en_attente_paiement", "payee"]
+  );
+});
+
+test("US15 paiement refusé : la commande reste en attente, la tentative est tracée", async () => {
+  const { appeler, numero } = await commandeEnAttente();
+  const res = await appeler("POST", `/api/commandes/${numero}/paiement`, CARTE_REFUSEE);
+  assert.strictEqual(res.status, 402);
+  assert.match(res.body.message, /Paiement refusé/);
+
+  const lue = await appeler("GET", `/api/commandes/${numero}`);
+  assert.strictEqual(lue.body.statut, "en_attente_paiement");
+  assert.strictEqual(lue.body.transactions[0].statut, "refusee");
+
+  // Le client peut réessayer avec une autre carte.
+  const ok = await appeler("POST", `/api/commandes/${numero}/paiement`, CARTE_OK);
+  assert.strictEqual(ok.body.statut, "payee");
+});
+
+test("US15 informations de paiement invalides : une erreur par champ, rien n'est payé", async () => {
+  const { appeler, numero } = await commandeEnAttente();
+  const res = await appeler("POST", `/api/commandes/${numero}/paiement`, {
+    moyen: "cheque",
+    titulaire: "",
+    numeroCarte: "1234 5678 9012 3456",
+    expiration: "01/20",
+    cvv: "12",
+  });
+  assert.strictEqual(res.status, 400);
+  for (const champ of ["moyen", "titulaire", "numeroCarte", "expiration", "cvv"]) {
+    assert.ok(res.body.errors[champ], champ);
+  }
+  const lue = await appeler("GET", `/api/commandes/${numero}`);
+  assert.strictEqual(lue.body.statut, "en_attente_paiement");
+  assert.strictEqual(lue.body.transactions.length, 0);
+});
+
+test("US15 on ne peut pas payer deux fois la même commande", async () => {
+  const { appeler, numero } = await commandeEnAttente();
+  const [r1, r2] = await Promise.all([
+    appeler("POST", `/api/commandes/${numero}/paiement`, CARTE_OK),
+    appeler("POST", `/api/commandes/${numero}/paiement`, CARTE_OK),
+  ]);
+  assert.deepStrictEqual([r1.status, r2.status].sort(), [200, 409]);
+  const encore = await appeler("POST", `/api/commandes/${numero}/paiement`, CARTE_OK);
+  assert.strictEqual(encore.status, 409);
+  assert.strictEqual(encore.body.message, "Cette commande est déjà payée");
+  const lue = await appeler("GET", `/api/commandes/${numero}`);
+  assert.strictEqual(lue.body.transactions.filter((t) => t.statut === "acceptee").length, 1);
+});
+
+test("US15 paiement annulé : commande annulée, plus payable", async () => {
+  const { appeler, numero } = await commandeEnAttente();
+  const res = await appeler("POST", `/api/commandes/${numero}/annulation`);
+  assert.strictEqual(res.status, 200);
+  assert.strictEqual(res.body.statut, "annulee");
+  const payer = await appeler("POST", `/api/commandes/${numero}/paiement`, CARTE_OK);
+  assert.strictEqual(payer.status, 409);
+  assert.strictEqual(payer.body.message, "Cette commande a été annulée");
+});
+
+test("US15 une commande payée ne peut plus être annulée par le client", async () => {
+  const { appeler, numero } = await commandeEnAttente();
+  await appeler("POST", `/api/commandes/${numero}/paiement`, CARTE_OK);
+  assert.strictEqual((await appeler("POST", `/api/commandes/${numero}/annulation`)).status, 409);
+});
+
+test("US15 contrôles de carte : Luhn et date d'expiration", () => {
+  assert.ok(luhnValide("4242424242424242"));
+  assert.ok(!luhnValide("4242424242424241"));
+  const nov2026 = new Date(2026, 10, 25);
+  assert.ok(expirationValide("11/26", nov2026));
+  assert.ok(!expirationValide("10/26", nov2026));
+  assert.ok(!expirationValide("13/30", nov2026));
 });

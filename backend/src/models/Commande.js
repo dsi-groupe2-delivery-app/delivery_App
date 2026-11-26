@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-// US14 : une commande passée par un client.
+// US14 / US15 : une commande passée par un client.
 // Tout ce qu'elle contient est une COPIE figée au moment de la validation du panier :
 // si l'agent change un prix ou un nom plus tard, la commande ne bouge pas.
 //
@@ -49,6 +49,20 @@ const adresseSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// US15 : trace de chaque tentative de paiement. Jamais de numéro de carte complet ni de CVV.
+const transactionSchema = new mongoose.Schema(
+  {
+    reference: { type: String, required: true },
+    moyen: { type: String, required: true },
+    statut: { type: String, enum: ["acceptee", "refusee"], required: true },
+    montantMillimes: { type: Number, required: true },
+    derniers4: String,
+    motif: String,
+    date: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
 const commandeSchema = new mongoose.Schema(
   {
     // CMD-AAAAMMJJ-NNNN, unique.
@@ -62,6 +76,8 @@ const commandeSchema = new mongoose.Schema(
     statut: { type: String, enum: STATUTS, default: "en_attente_paiement" },
     // Chaque changement de statut est enregistré (qui l'a fait n'est pas requis au Sprint 2).
     historique: [{ _id: false, statut: { type: String, enum: STATUTS }, date: { type: Date, default: Date.now } }],
+    transactions: [transactionSchema],
+    payeeLe: { type: Date, default: null },
   },
   { timestamps: true }
 );

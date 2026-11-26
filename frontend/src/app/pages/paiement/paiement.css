@@ -1,0 +1,15 @@
+.moyens { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1rem; }
+.moyen { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.55rem 0.9rem; border: 1px solid var(--border); border-radius: 10px; font-size: 0.92rem; cursor: pointer; }
+.moyen.actif { border-color: var(--primary); background: var(--primary-soft); color: var(--primary-dark); }
+.moyen input { margin: 0; accent-color: var(--primary); }
+
+.champ { margin-bottom: 0.9rem; }
+.champ label { display: block; margin-bottom: 0.3rem; font-size: 0.9rem; font-weight: 600; }
+.champ input { width: 100%; padding: 0.7rem 0.85rem; border: 1px solid var(--border); border-radius: 10px; font: inherit; }
+.champ input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+.ligne-champs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+.ligne-resume { display: flex; justify-content: space-between; gap: 1rem; margin: 0.35rem 0; font-size: 0.92rem; }
+.confirmer { margin-top: 1rem; }
+.confirmer p { margin: 0; }
+.danger { background: var(--error); }

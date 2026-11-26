@@ -3,11 +3,11 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { CartService } from './cart.service';
-import { Commande } from './commande.models';
+import { Commande, DonneesPaiement, MoyenPaiement } from './commande.models';
 
 const API = `${environment.apiUrl}/api/commandes`;
 
-/** US14 : appels à l'API des commandes du client connecté. */
+/** US14 / US15 : appels à l'API des commandes du client connecté. */
 @Injectable({ providedIn: 'root' })
 export class CommandeService {
   private readonly http = inject(HttpClient);
@@ -25,5 +25,19 @@ export class CommandeService {
 
   lire(numero: string): Promise<Commande> {
     return firstValueFrom(this.http.get<Commande>(`${API}/${encodeURIComponent(numero)}`));
+  }
+
+  moyensPaiement(): Promise<MoyenPaiement[]> {
+    return firstValueFrom(this.http.get<MoyenPaiement[]>(`${API}/moyens-paiement`));
+  }
+
+  /** US15 : paiement simulé. */
+  payer(numero: string, donnees: DonneesPaiement): Promise<Commande> {
+    return firstValueFrom(this.http.post<Commande>(`${API}/${encodeURIComponent(numero)}/paiement`, donnees));
+  }
+
+  /** US15 : le client abandonne le paiement, la commande est annulée. */
+  annuler(numero: string): Promise<Commande> {
+    return firstValueFrom(this.http.post<Commande>(`${API}/${encodeURIComponent(numero)}/annulation`, {}));
   }
 }
