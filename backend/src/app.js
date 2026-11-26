@@ -75,6 +75,8 @@ app.use("/api", catalogueApiRoutes);
 app.use("/api/panier", cartRoutes);
 // Adresses de livraison du client (US13)
 app.use("/api/adresses", adresseRoutes);
+// Commandes du client : validation du panier (US14)
+app.use("/api/commandes", require("./routes/commandes"));
 // Erreurs non gérées : réponse générique, sans détail technique pour le client.
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {

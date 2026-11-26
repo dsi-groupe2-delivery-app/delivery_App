@@ -1,0 +1,80 @@
+<section class="page-commande">
+  <h1>Récapitulatif de la commande</h1>
+  <p class="sous-titre">Vérifiez votre commande avant de passer au paiement.</p>
+
+  @if (chargement()) {
+    <p class="etat">Chargement…</p>
+  } @else if (!panier()?.lignes?.length) {
+    <div class="bloc etat">
+      <p>Votre panier est vide.</p>
+      <a routerLink="/carte" class="lien">Voir la carte</a>
+    </div>
+  } @else {
+    @if (erreur()) {
+      <div class="alert alert-error" role="alert">
+        {{ erreur() }}
+        @for (d of details(); track d) { <span class="detail">• {{ d }}</span> }
+      </div>
+    }
+
+    <div class="grille">
+      <div class="bloc">
+        <h2>Articles</h2>
+        <table class="articles">
+          <thead>
+            <tr><th>Article</th><th class="nb">Qté</th><th class="nb">Prix unit.</th><th class="nb">Total</th></tr>
+          </thead>
+          <tbody>
+            @for (l of panier()!.lignes; track l._id) {
+              <tr>
+                <td>
+                  <strong>{{ l.nom }}</strong>
+                  @for (g of l.choix; track g.groupeId) {
+                    <span class="detail">{{ g.libelle }} : {{ options(g) }}</span>
+                  }
+                  @for (a of l.alertes; track a.message) {
+                    <span class="alerte" [class.prix]="a.type === 'prix_modifie'">{{ a.message }}</span>
+                  }
+                </td>
+                <td class="nb">{{ l.quantite }}</td>
+                <td class="nb">{{ l.prixUnitaire | tnd }}</td>
+                <td class="nb">{{ l.totalLigne | tnd }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <p class="total"><span>Total à payer</span><span>{{ panier()!.total | tnd }}</span></p>
+      </div>
+
+      <div>
+        <div class="bloc adresse">
+          <h2>Livraison</h2>
+          @if (panier()!.adresse; as a) {
+            <p><strong>{{ a.libelle || 'Adresse' }}</strong></p>
+            <p>{{ a.rue }}@if (a.complement) {, {{ a.complement }}}</p>
+            <p>{{ a.ville }} {{ a.codePostal }} – {{ a.telephone }}</p>
+            @if (a.instructions) { <p class="aide">{{ a.instructions }}</p> }
+          } @else {
+            <p class="alerte">Aucune adresse de livraison choisie.</p>
+          }
+          <a routerLink="/livraison" class="lien">{{ panier()!.adresse ? "Modifier l'adresse" : 'Choisir une adresse' }}</a>
+        </div>
+
+        @if (indisponibles().length) {
+          <p class="aide alerte">Certains articles ne sont plus disponibles : retirez-les de votre panier pour continuer.</p>
+          <a routerLink="/panier" class="btn btn-clair">← Retour au panier</a>
+        } @else if (prixModifies().length) {
+          <p class="aide alerte prix">Certains prix ont changé depuis votre ajout au panier.</p>
+          <button type="button" class="btn btn-clair" [disabled]="enCours()" (click)="accepterPrix()">Accepter les nouveaux prix</button>
+        }
+
+        <button type="button" class="btn" [disabled]="!peutValider() || enCours()" (click)="confirmer()">
+          {{ enCours() ? 'Validation…' : 'Confirmer la commande' }}
+        </button>
+        @if (!panier()!.adresse) {
+          <p class="aide">Choisissez une adresse de livraison pour valider.</p>
+        }
+      </div>
+    </div>
+  }
+</section>

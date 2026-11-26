@@ -6,7 +6,7 @@ import { AdresseService } from '../../core/adresse.service';
 import { CartService } from '../../core/cart.service';
 import { messageErreur } from '../../core/erreurs';
 import { FieldErrors } from '../../core/models';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 /** US13 : saisir ou choisir l'adresse de livraison du panier. */
 @Component({
@@ -20,6 +20,7 @@ export class Livraison implements OnInit {
   private readonly adresseService = inject(AdresseService);
   private readonly cart = inject(CartService);
   private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
   /** Adresses enregistrées dans le profil du client. */
   protected readonly adresses = signal<Adresse[]>([]);
   /** Adresse choisie : l'id d'une adresse enregistrée, ou 'nouvelle'. */
@@ -110,6 +111,8 @@ export class Livraison implements OnInit {
       const adresseId = this.choix() === 'nouvelle' ? await this.nouvelleAdresseId() : this.choix();
       await this.cart.choisirAdresse(adresseId);
       this.succes.set('Adresse de livraison enregistrée pour votre commande.');
+      // US14 : étape suivante, le récapitulatif de la commande.
+      await this.router.navigate(['/recapitulatif']);
     } catch (err) {
       const e = err as HttpErrorResponse;
       // 400 avec une erreur par champ : affichée sous le champ, la saisie est conservée.
