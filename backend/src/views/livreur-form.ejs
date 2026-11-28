@@ -1,0 +1,33 @@
+<%- include("partials/haut", { titre: "Modifier le livreur" }) %>
+<link rel="stylesheet" href="/static/livreurs.css">
+
+<div class="page-livreurs">
+  <p><a href="/admin/equipe-livreurs">&larr; Retour à l'équipe de livraison</a></p>
+
+  <div class="pl-carte pl-formulaire">
+    <h1>Modifier le livreur</h1>
+    <!-- _method=PUT transforme le POST en PUT (method-override), comme pour la modification d'un produit. -->
+    <form method="POST" action="/admin/equipe-livreurs/<%= livreur._id %>?_method=PUT" novalidate>
+      <label for="nom">Nom</label>
+      <input type="text" id="nom" name="nom" value="<%= valeurs.nom || '' %>">
+      <% if (erreurs.nom) { %><p class="pl-erreur"><%= erreurs.nom %></p><% } %>
+
+      <label for="prenom">Prénom</label>
+      <input type="text" id="prenom" name="prenom" value="<%= valeurs.prenom || '' %>">
+      <% if (erreurs.prenom) { %><p class="pl-erreur"><%= erreurs.prenom %></p><% } %>
+
+      <label for="telephone">Téléphone</label>
+      <input type="text" id="telephone" name="telephone" placeholder="22 000 000" value="<%= valeurs.telephone || '' %>">
+      <% if (erreurs.telephone) { %><p class="pl-erreur"><%= erreurs.telephone %></p><% } %>
+
+      <p class="pl-note">E-mail du compte (non modifiable) : <strong><%= livreur.email %></strong></p>
+
+      <div class="pl-actions">
+        <button type="submit" class="pl-bouton">Enregistrer les modifications</button>
+        <a href="/admin/equipe-livreurs" class="pl-bouton pl-secondaire">Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include("partials/bas") %>

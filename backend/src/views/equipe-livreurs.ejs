@@ -1,0 +1,64 @@
+<%- include("partials/haut", { titre: "Équipe de livraison" }) %>
+<link rel="stylesheet" href="/static/livreurs.css">
+
+<div class="page-livreurs">
+  <div class="pl-entete">
+    <div class="pl-titre-bloc">
+      <span class="pl-icone" aria-hidden="true">&#x1F6F5;</span>
+      <div>
+        <h1>Équipe de livraison</h1>
+        <p class="pl-sous-titre">Les livreurs enregistrés : modifiez leur nom, prénom et téléphone.</p>
+      </div>
+    </div>
+    <a href="/admin/livreurs" class="pl-bouton pl-secondaire">Demandes d'inscription</a>
+  </div>
+
+  <% if (message) { %>
+    <p class="pl-message" role="status"><%= message %></p>
+  <% } %>
+
+  <div class="pl-carte">
+    <div class="pl-filtre">
+      <span class="pl-compteur"><%= livreurs.length %> livreur<%= livreurs.length > 1 ? "s" : "" %></span>
+    </div>
+
+    <% if (livreurs.length === 0) { %>
+      <p class="pl-vide">Aucun livreur enregistré pour le moment.</p>
+    <% } else { %>
+      <div class="pl-tableau-conteneur">
+        <table class="pl-tableau">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Prénom</th>
+              <th>E-mail</th>
+              <th>Téléphone</th>
+              <th>Compte</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% livreurs.forEach((livreur) => { %>
+              <tr>
+                <td class="pl-nom"><%= livreur.nom %></td>
+                <td><%= livreur.prenom %></td>
+                <td><%= livreur.email %></td>
+                <td><%= livreur.telephone %></td>
+                <td>
+                  <span class="pl-statut <%= livreur.actif ? 'pl-actif' : 'pl-inactif' %>">
+                    <%= livreur.actif ? "Actif" : "Désactivé" %>
+                  </span>
+                </td>
+                <td>
+                  <a href="/admin/equipe-livreurs/<%= livreur._id %>/edit" class="pl-bouton pl-petit pl-secondaire">Modifier</a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include("partials/bas") %>
