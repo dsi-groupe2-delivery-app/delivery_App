@@ -89,7 +89,7 @@ const commandeSchema = new mongoose.Schema(
 commandeSchema.index({ client: 1, cle: 1 }, { unique: true }); // anti double clic (US14)
 commandeSchema.index({ client: 1, createdAt: -1 }); // commandes d'un client, plus récentes d'abord
 commandeSchema.index({ statut: 1, createdAt: 1 }); // listes de l'agent par statut
-
+commandeSchema.index({ createdAt: -1 });
 module.exports = mongoose.models.Commande || mongoose.model("Commande", commandeSchema);
 module.exports.STATUTS = STATUTS;
 module.exports.LIBELLES_STATUT = LIBELLES_STATUT;

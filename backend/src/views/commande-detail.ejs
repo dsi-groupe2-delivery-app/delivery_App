@@ -1,0 +1,77 @@
+<%- include("partials/haut", { titre: "Commande " + commande.numero }) %>
+<link rel="stylesheet" href="/static/commandes.css">
+
+<div class="page-commandes">
+  <p><a href="/admin/commandes">&larr; Retour aux commandes payées</a></p>
+
+  <div class="pc-entete">
+    <div class="pc-titre-bloc">
+      <span class="pc-icone" aria-hidden="true">&#x1F9FE;</span>
+      <div>
+        <h1>Commande <%= commande.numero %></h1>
+        <p class="pc-sous-titre">Passée le <%= commande.date %><% if (commande.payeeLe) { %> · payée le <%= commande.payeeLe %><% } %></p>
+      </div>
+    </div>
+    <span class="pc-statut pc-statut-<%= commande.statut %>"><%= commande.libelleStatut %></span>
+  </div>
+
+  <% if (message) { %>
+    <p class="pc-message" role="status"><%= message %></p>
+  <% } %>
+
+  <div class="pc-colonnes">
+    <div class="pc-carte pc-bloc">
+      <h2>Client</h2>
+      <p><strong><%= commande.client.nom %></strong></p>
+      <% if (commande.client.email) { %><p><%= commande.client.email %></p><% } %>
+      <% if (commande.client.telephone) { %><p>Tél. <%= commande.client.telephone %></p><% } %>
+    </div>
+
+    <div class="pc-carte pc-bloc">
+      <h2>Adresse de livraison</h2>
+      <% if (commande.adresse.libelle) { %><p><strong><%= commande.adresse.libelle %></strong></p><% } %>
+      <p><%= commande.adresse.uneLigne %></p>
+      <p>Tél. <%= commande.adresse.telephone %></p>
+      <% if (commande.adresse.instructions) { %><p class="pc-note">Instructions : <%= commande.adresse.instructions %></p><% } %>
+    </div>
+  </div>
+
+  <div class="pc-carte">
+    <div class="pc-tableau-conteneur">
+      <table class="pc-tableau">
+        <thead>
+          <tr>
+            <th>Article</th>
+            <th>Quantité</th>
+            <th>Prix unitaire</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% commande.lignes.forEach((ligne) => { %>
+            <tr>
+              <td>
+                <span class="pc-nom"><%= ligne.nom %></span>
+                <% if (ligne.type === "menu") { %><span class="pc-etiquette">Menu composé</span><% } %>
+                <% ligne.choix.forEach((groupe) => { %>
+                  <div class="pc-choix"><%= groupe.libelle %> : <%= groupe.options.join(", ") %></div>
+                <% }) %>
+              </td>
+              <td><%= ligne.quantite %></td>
+              <td class="pc-prix"><%= millimesVersTnd(ligne.prixUnitaireMillimes) %> TND</td>
+              <td class="pc-prix"><%= millimesVersTnd(ligne.totalMillimes) %> TND</td>
+            </tr>
+          <% }) %>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3" class="pc-total-libelle">Total à payer</td>
+            <td class="pc-prix pc-total"><%= millimesVersTnd(commande.totalMillimes) %> TND</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include("partials/bas") %>

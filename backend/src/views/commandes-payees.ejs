@@ -1,0 +1,66 @@
+<%- include("partials/haut", { titre: "Commandes payées" }) %>
+<link rel="stylesheet" href="/static/commandes.css">
+
+<div class="page-commandes">
+  <div class="pc-entete">
+    <div class="pc-titre-bloc">
+      <span class="pc-icone" aria-hidden="true">&#x1F9FE;</span>
+      <div>
+        <h1>Commandes payées</h1>
+        <p class="pc-sous-titre">Les commandes payées par les clients, à traiter par le restaurant.</p>
+      </div>
+    </div>
+  </div>
+
+  <% if (message) { %>
+    <p class="pc-message" role="status"><%= message %></p>
+  <% } %>
+
+  <div class="pc-carte">
+    <!-- Tri par date : recharge la page avec ?tri=recent ou ?tri=ancien -->
+    <form method="GET" action="/admin/commandes" class="pc-filtre">
+      <label for="tri">Trier par date :</label>
+      <select id="tri" name="tri" onchange="this.form.submit()">
+        <option value="recent" <%= tri === "recent" ? "selected" : "" %>>Plus récentes d'abord</option>
+        <option value="ancien" <%= tri === "ancien" ? "selected" : "" %>>Plus anciennes d'abord</option>
+      </select>
+      <noscript><button type="submit" class="pc-bouton pc-secondaire">Trier</button></noscript>
+      <span class="pc-compteur"><%= commandes.length %> commande<%= commandes.length > 1 ? "s" : "" %></span>
+    </form>
+
+    <% if (commandes.length === 0) { %>
+      <p class="pc-vide">Aucune commande payée pour le moment.</p>
+    <% } else { %>
+      <div class="pc-tableau-conteneur">
+        <table class="pc-tableau">
+          <thead>
+            <tr>
+              <th>Numéro</th>
+              <th>Date</th>
+              <th>Client</th>
+              <th>Adresse de livraison</th>
+              <th>Total</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% commandes.forEach((commande) => { %>
+              <tr>
+                <td class="pc-numero"><%= commande.numero %></td>
+                <td><%= commande.date %></td>
+                <td><%= commande.client %></td>
+                <td><%= commande.adresse %></td>
+                <td class="pc-prix"><%= millimesVersTnd(commande.totalMillimes) %> TND</td>
+                <td>
+                  <a href="/admin/commandes/<%= commande.numero %>" class="pc-bouton pc-petit pc-secondaire">Voir le détail</a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include("partials/bas") %>
