@@ -1,0 +1,163 @@
+/* US16 / US17 : style des pages Commandes du Back-Office.
+   Toutes les règles sont limitées à .page-commandes : les autres pages ne changent pas. */
+
+.page-commandes {
+  --rouge: #c92a2a;
+  --rouge-fonce: #a51d1d;
+  --rouge-clair: #fff0f0;
+  --vert: #1e7b46;
+  --vert-clair: #e7f6ec;
+  --orange: #b45309;
+  --orange-clair: #fff4e0;
+  --gris: #6b7280;
+  --bordure: #ececec;
+  --ombre: 0 1px 4px rgba(0, 0, 0, 0.06);
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* ---------- Blocs blancs ---------- */
+.page-commandes .pc-entete,
+.page-commandes .pc-carte {
+  background: #fff;
+  border: 1px solid var(--bordure);
+  border-radius: 12px;
+  box-shadow: var(--ombre);
+}
+.page-commandes .pc-carte { overflow: hidden; margin-bottom: 16px; }
+
+/* ---------- En-tête de page ---------- */
+.page-commandes .pc-entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 20px 24px;
+  border-left: 5px solid var(--rouge);
+}
+.page-commandes .pc-titre-bloc { display: flex; align-items: center; gap: 14px; }
+.page-commandes .pc-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--rouge-clair);
+  font-size: 24px;
+}
+.page-commandes h1 { margin: 0; font-size: 24px; color: var(--rouge-fonce); }
+.page-commandes .pc-sous-titre { margin: 2px 0 0; color: var(--gris); font-size: 14px; }
+
+/* ---------- Boutons ---------- */
+.page-commandes .pc-bouton {
+  display: inline-block;
+  padding: 10px 18px;
+  border: 1px solid var(--rouge);
+  border-radius: 8px;
+  background: var(--rouge);
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.page-commandes .pc-bouton:hover { background: var(--rouge-fonce); transform: translateY(-1px); }
+.page-commandes .pc-secondaire { background: #fff; color: var(--rouge); }
+.page-commandes .pc-secondaire:hover { background: var(--rouge-clair); color: var(--rouge-fonce); }
+.page-commandes .pc-petit { padding: 6px 14px; font-size: 13px; }
+
+/* ---------- Messages ---------- */
+.page-commandes .pc-message,
+.page-commandes .pc-erreur {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+.page-commandes .pc-message { border-left: 4px solid var(--vert); background: var(--vert-clair); color: var(--vert); }
+.page-commandes .pc-erreur { border-left: 4px solid var(--rouge); background: var(--rouge-clair); color: var(--rouge); }
+.page-commandes .pc-info { margin: 0; padding: 14px 18px; color: var(--gris); }
+
+/* ---------- Tri ---------- */
+.page-commandes .pc-filtre {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--bordure);
+}
+.page-commandes .pc-filtre label { margin: 0; font-weight: bold; white-space: nowrap; }
+.page-commandes .pc-filtre select {
+  width: auto;
+  min-width: 200px;
+  padding: 8px 10px;
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+.page-commandes .pc-compteur { margin-left: auto; color: var(--gris); font-size: 13px; }
+
+/* ---------- Tableaux ---------- */
+.page-commandes .pc-tableau-conteneur { overflow-x: auto; }
+.page-commandes .pc-tableau { width: 100%; border-collapse: collapse; }
+.page-commandes .pc-tableau th,
+.page-commandes .pc-tableau td { padding: 12px 16px; text-align: left; }
+.page-commandes .pc-tableau th {
+  background: var(--rouge-clair);
+  color: var(--rouge-fonce);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 2px solid #f3caca;
+}
+.page-commandes .pc-tableau td { border-bottom: 1px solid var(--bordure); vertical-align: top; }
+.page-commandes .pc-tableau tbody tr:hover { background: #fff7f7; }
+.page-commandes .pc-tableau tbody tr:last-child td { border-bottom: 0; }
+.page-commandes .pc-numero { font-weight: bold; white-space: nowrap; }
+.page-commandes .pc-prix { white-space: nowrap; font-weight: bold; }
+.page-commandes .pc-nom { font-weight: bold; }
+.page-commandes .pc-choix { margin-top: 4px; color: var(--gris); font-size: 13px; }
+.page-commandes .pc-etiquette {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f4f4f5;
+  color: #444;
+  font-size: 11px;
+}
+.page-commandes tfoot td { border-top: 2px solid var(--bordure); background: #fafafa; }
+.page-commandes .pc-total-libelle { text-align: right; font-weight: bold; }
+.page-commandes .pc-total { font-size: 18px; color: var(--rouge-fonce); }
+.page-commandes .pc-vide { margin: 0; padding: 24px 18px; color: var(--gris); text-align: center; }
+
+/* ---------- Détail : client et adresse côte à côte ---------- */
+.page-commandes .pc-colonnes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+.page-commandes .pc-bloc { padding: 16px 20px; }
+.page-commandes .pc-bloc h2 { margin: 0 0 10px; font-size: 16px; color: var(--rouge-fonce); }
+.page-commandes .pc-bloc p { margin: 4px 0; }
+.page-commandes .pc-note { color: var(--gris); font-size: 14px; }
+
+/* ---------- Pastille de statut ---------- */
+.page-commandes .pc-statut {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: bold;
+  background: var(--orange-clair);
+  color: var(--orange);
+}
+.page-commandes .pc-statut-payee { background: var(--vert-clair); color: var(--vert); }
+
+/* ---------- Action de validation (US17) ---------- */
+.page-commandes .pc-actions { margin: 0; padding: 16px 18px; }

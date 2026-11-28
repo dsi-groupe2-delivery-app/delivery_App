@@ -77,6 +77,7 @@ router.post("/produits", catalogue.creerProduit);
 router.get("/produits", catalogue.listeProduits);
 router.get("/produits/:id/edit", catalogue.afficherFormulaireModification);
 router.put("/produits/:id", catalogue.enregistrerModificationProduit);
+router.use("/commandes", require("./adminCommandes"));
 // POST /admin/logout : déconnexion puis retour à la page de connexion
 router.post("/logout", (req, res, next) => {
   const cookieName = req.app.get("sessionCookieName");
