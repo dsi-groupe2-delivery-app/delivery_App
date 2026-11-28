@@ -18,6 +18,9 @@
   <% if (message) { %>
     <p class="pc-message" role="status"><%= message %></p>
   <% } %>
+  <% if (erreur) { %>
+    <p class="pc-erreur" role="alert"><%= erreur %></p>
+  <% } %>
 
   <div class="pc-colonnes">
     <div class="pc-carte pc-bloc">
@@ -71,6 +74,17 @@
         </tfoot>
       </table>
     </div>
+  </div>
+
+  <!-- US17 : seule une commande « Payée » peut être validée. Elle passe alors « En préparation ». -->
+  <div class="pc-carte">
+    <% if (commande.statut === "payee") { %>
+      <form method="POST" action="/admin/commandes/<%= commande.numero %>/validation" class="pc-actions">
+        <button type="submit" class="pc-bouton">Valider la commande</button>
+      </form>
+    <% } else { %>
+      <p class="pc-info">Cette commande n'est plus à valider (statut : <%= commande.libelleStatut %>).</p>
+    <% } %>
   </div>
 </div>
 
