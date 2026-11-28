@@ -1,0 +1,129 @@
+/* US24 : style des pages « Équipe de livraison » du Back-Office.
+   Toutes les règles sont limitées à .page-livreurs : les autres pages ne changent pas. */
+
+.page-livreurs {
+  --rouge: #c92a2a;
+  --rouge-fonce: #a51d1d;
+  --rouge-clair: #fff0f0;
+  --vert: #1e7b46;
+  --vert-clair: #e7f6ec;
+  --gris: #6b7280;
+  --bordure: #ececec;
+  --ombre: 0 1px 4px rgba(0, 0, 0, 0.06);
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* ---------- Blocs blancs ---------- */
+.page-livreurs .pl-entete,
+.page-livreurs .pl-carte {
+  background: #fff;
+  border: 1px solid var(--bordure);
+  border-radius: 12px;
+  box-shadow: var(--ombre);
+}
+.page-livreurs .pl-carte { overflow: hidden; margin-bottom: 16px; }
+
+/* ---------- En-tête de page ---------- */
+.page-livreurs .pl-entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 20px 24px;
+  border-left: 5px solid var(--rouge);
+}
+.page-livreurs .pl-titre-bloc { display: flex; align-items: center; gap: 14px; }
+.page-livreurs .pl-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--rouge-clair);
+  font-size: 24px;
+}
+.page-livreurs h1 { margin: 0; font-size: 24px; color: var(--rouge-fonce); }
+.page-livreurs .pl-sous-titre { margin: 2px 0 0; color: var(--gris); font-size: 14px; }
+
+/* ---------- Boutons ---------- */
+.page-livreurs .pl-bouton {
+  display: inline-block;
+  padding: 10px 18px;
+  border: 1px solid var(--rouge);
+  border-radius: 8px;
+  background: var(--rouge);
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.page-livreurs .pl-bouton:hover { background: var(--rouge-fonce); transform: translateY(-1px); }
+.page-livreurs .pl-secondaire { background: #fff; color: var(--rouge); }
+.page-livreurs .pl-secondaire:hover { background: var(--rouge-clair); color: var(--rouge-fonce); }
+.page-livreurs .pl-petit { padding: 6px 14px; font-size: 13px; }
+
+/* ---------- Message de confirmation ---------- */
+.page-livreurs .pl-message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  border-left: 4px solid var(--vert);
+  background: var(--vert-clair);
+  color: var(--vert);
+  font-weight: bold;
+}
+
+/* ---------- Liste ---------- */
+.page-livreurs .pl-filtre { padding: 14px 18px; border-bottom: 1px solid var(--bordure); }
+.page-livreurs .pl-compteur { color: var(--gris); font-size: 13px; }
+.page-livreurs .pl-tableau-conteneur { overflow-x: auto; }
+.page-livreurs .pl-tableau { width: 100%; border-collapse: collapse; }
+.page-livreurs .pl-tableau th,
+.page-livreurs .pl-tableau td { padding: 12px 16px; text-align: left; }
+.page-livreurs .pl-tableau th {
+  background: var(--rouge-clair);
+  color: var(--rouge-fonce);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 2px solid #f3caca;
+}
+.page-livreurs .pl-tableau td { border-bottom: 1px solid var(--bordure); vertical-align: middle; }
+.page-livreurs .pl-tableau tbody tr:hover { background: #fff7f7; }
+.page-livreurs .pl-tableau tbody tr:last-child td { border-bottom: 0; }
+.page-livreurs .pl-nom { font-weight: bold; }
+.page-livreurs .pl-statut {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: bold;
+}
+.page-livreurs .pl-actif { background: var(--vert-clair); color: var(--vert); }
+.page-livreurs .pl-inactif { background: var(--rouge-clair); color: var(--rouge); }
+.page-livreurs .pl-vide { margin: 0; padding: 24px 18px; color: var(--gris); text-align: center; }
+
+/* ---------- Formulaire ---------- */
+.page-livreurs .pl-formulaire { max-width: 520px; padding: 24px; }
+.page-livreurs .pl-formulaire h1 { margin-bottom: 8px; font-size: 22px; }
+.page-livreurs .pl-formulaire label { display: block; margin: 14px 0 4px; font-weight: bold; }
+.page-livreurs .pl-formulaire input[type=text] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+}
+.page-livreurs .pl-formulaire input[type=text]:focus {
+  outline: none;
+  border-color: var(--rouge);
+  box-shadow: 0 0 0 3px rgba(201, 42, 42, 0.15);
+}
+.page-livreurs .pl-erreur { margin: 4px 0 0; color: var(--rouge); font-size: 13px; }
+.page-livreurs .pl-note { margin: 16px 0 0; color: var(--gris); font-size: 14px; }
+.page-livreurs .pl-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }

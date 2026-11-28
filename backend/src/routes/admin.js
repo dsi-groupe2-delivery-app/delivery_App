@@ -73,6 +73,8 @@ router.get("/categories", catalogue.listeCategories);
 router.post("/categories", catalogue.creerCategorie);
 router.get("/produits/new", catalogue.nouveauProduit);
 router.post("/produits", catalogue.creerProduit);
+
+router.use("/equipe-livreurs", require("./adminLivreurs"));
 // US07 : liste et modification des produits
 router.get("/produits", catalogue.listeProduits);
 router.get("/produits/:id/edit", catalogue.afficherFormulaireModification);
